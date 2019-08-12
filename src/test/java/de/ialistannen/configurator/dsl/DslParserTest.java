@@ -7,6 +7,7 @@ import de.ialistannen.configurator.util.ParseException;
 import de.ialistannen.configurator.util.StringReader;
 import java.util.Arrays;
 import java.util.Collections;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -108,11 +109,21 @@ class DslParserTest {
     );
   }
 
+  @Test
+  public void handleEmptyLineInAssignment() throws ParseException {
+    String input = "\n# user = test";
+    AstNode result = getParsedResult(input);
+    assertThat(result).isEqualTo(wrapInBlock(
+        new LiteralAstNode("\n"),
+        new AssignmentAstNode("user", new LiteralAstNode("test"))
+    ));
+  }
+
   private AstNode getParsedResult(String input) throws ParseException {
     return new DslParser(new StringReader("Command prefix: #\n" + input)).parse();
   }
 
-  private AstNode wrapInBlock(AstNode other) {
-    return new BlockAstNode(Collections.singletonList(other));
+  private AstNode wrapInBlock(AstNode... other) {
+    return new BlockAstNode(Arrays.asList(other));
   }
 }

@@ -202,7 +202,7 @@ public class StringReader {
    * @return the read line
    */
   public String readLineIncludingNewline() {
-    return readRegex(Pattern.compile(".+(\\n|$)"));
+    return readRegex(Pattern.compile(".*?(\\n|$)"));
   }
 
   /**
