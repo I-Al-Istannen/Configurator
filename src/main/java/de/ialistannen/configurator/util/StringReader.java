@@ -189,11 +189,20 @@ public class StringReader {
    * @return the read line
    */
   public String readLine() {
-    String read = readRegex(Pattern.compile(".+(\\n|$)"));
+    String read = readLineIncludingNewline();
     if (read.endsWith(System.lineSeparator())) {
       return read.substring(0, read.length() - System.lineSeparator().length());
     }
     return read;
+  }
+
+  /**
+   * Reads a single line.
+   *
+   * @return the read line
+   */
+  public String readLineIncludingNewline() {
+    return readRegex(Pattern.compile(".+(\\n|$)"));
   }
 
   /**

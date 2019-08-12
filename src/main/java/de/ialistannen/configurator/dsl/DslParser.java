@@ -37,7 +37,7 @@ public class DslParser {
     List<AstNode> children = new ArrayList<>();
 
     while (input.canRead()) {
-      children.add(parseSection());
+      children.add(parseSection(true));
     }
 
     return new BlockAstNode(children);
@@ -59,7 +59,7 @@ public class DslParser {
    *
    * @return the parse result
    */
-  private AstNode parseSection() throws ParseException {
+  private AstNode parseSection(boolean withNewline) throws ParseException {
     if (input.peek(commandPrefix.length()).equals(commandPrefix)) {
       Optional<AstNode> command = tryParse(this::parseCommand, input);
       if (command.isPresent()) {
@@ -67,7 +67,12 @@ public class DslParser {
       }
     }
 
-    String line = input.readLine();
+    String line;
+    if (withNewline) {
+      line = input.readLineIncludingNewline();
+    } else {
+      line = input.readLine();
+    }
     StringReader reader = new StringReader(line);
 
     List<AstNode> children = new ArrayList<>();
@@ -101,7 +106,7 @@ public class DslParser {
     String name = input.readWhile(it -> !Character.isWhitespace(it));
 
     input.assertRead(" = ");
-    AstNode value = parseSection();
+    AstNode value = parseSection(false);
 
     return new AssignmentAstNode(name, value);
   }
