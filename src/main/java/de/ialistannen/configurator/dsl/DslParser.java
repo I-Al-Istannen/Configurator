@@ -1,6 +1,7 @@
 package de.ialistannen.configurator.dsl;
 
 import de.ialistannen.configurator.context.Action;
+import de.ialistannen.configurator.dsl.comparison.ComparisonAstNode;
 import de.ialistannen.configurator.dsl.script.PythonScript;
 import de.ialistannen.configurator.util.ParseException;
 import de.ialistannen.configurator.util.StringReader;
@@ -9,10 +10,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 
 /**
  * A parser for the configurator DSL.
  */
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class DslParser {
 
   private StringReader input;
@@ -101,14 +106,74 @@ public class DslParser {
 
     input.readWhile(Character::isWhitespace);
     String firstWord = input.peekWhile(it -> !Character.isWhitespace(it));
-    if (firstWord.equals("action")) {
-      return readAction();
-    } else if (firstWord.equals("script")) {
-      return readScript();
+    switch (firstWord) {
+      case "action":
+        return readAction();
+      case "script":
+        return readScript();
+      case "if":
+        return readIf();
+      default:
+        return readAssignment();
     }
+  }
 
-    // TODO: Ifs?
-    return readAssignment();
+  private AstNode readIf() throws ParseException {
+    return readNamedEnclosed(
+        "if",
+        (condition, content) -> {
+          AstNode contentNode = parseSectionOnString(content, false);
+          ComparisonAstNode comparison = new DslParser(
+              new StringReader(condition), commandPrefix
+          ).readComparison();
+          return new IfAstNode(comparison, contentNode);
+        }
+    );
+  }
+
+  private ComparisonAstNode readComparison() throws ParseException {
+    AstNode left = parseSectionOnString(input.readEnclosedByParentheses(), false);
+
+    input.readWhile(Character::isWhitespace);
+    String operator = input.readWhile(it -> !Character.isWhitespace(it));
+    input.readWhile(Character::isWhitespace);
+
+    BiFunction<String, String, Boolean> comparison;
+    switch (operator) {
+      case "==":
+        comparison = String::equalsIgnoreCase;
+        break;
+      case "===":
+        comparison = String::equals;
+        break;
+      case "~=":
+        comparison = String::matches;
+        break;
+      case "!=":
+        comparison = (a, b) -> !a.equals(b);
+        break;
+      case ">":
+        comparison = (a, b) -> Integer.parseInt(a) > Integer.parseInt(b);
+        break;
+      case "<":
+        comparison = (a, b) -> Integer.parseInt(a) < Integer.parseInt(b);
+        break;
+      case "||":
+        comparison = (a, b) -> Boolean.parseBoolean(a) || Boolean.parseBoolean(b);
+        break;
+      case "&&":
+        comparison = (a, b) -> Boolean.parseBoolean(a) && Boolean.parseBoolean(b);
+        break;
+      default:
+        throw new ParseException(input, "Unknown comparison");
+    }
+    AstNode right = parseSectionOnString(input.readEnclosedByParentheses(), false);
+
+    return new ComparisonAstNode(left, right, comparison);
+  }
+
+  private AstNode parseSectionOnString(String input, boolean newline) throws ParseException {
+    return new DslParser(new StringReader(input), commandPrefix).parseSection(newline);
   }
 
   private AstNode readScript() throws ParseException {

@@ -10,6 +10,8 @@ import de.ialistannen.configurator.context.RenderContext;
 import de.ialistannen.configurator.util.ParseException;
 import java.util.AbstractMap.SimpleEntry;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class StringRenderTargetTest {
 
@@ -163,6 +165,55 @@ class StringRenderTargetTest {
         .asInstanceOf(map(String.class, Object.class))
         .containsEntry("Hey", 20)
         .hasSize(1);
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllActions)
+        .asInstanceOf(list(Action.class))
+        .isEmpty();
+  }
+
+  @ParameterizedTest(name = "\"{0}\" should be {1}")
+  @CsvSource({
+      "(hey) == (hey), true",
+      "(hey) == (Hey), true",
+      "(hey) == (heys), false",
+      "(hey) === (hey), true",
+      "(hey) === (Hey), false",
+      "(hey) === (heys), false",
+      "(hey) != (hey), false",
+      "(hey) != (Hey), true",
+      "(hey) != (heys), true",
+      "(5) > (5), false",
+      "(5) > (6), false",
+      "(5) > (4), true",
+      "(5) < (5), false",
+      "(5) < (6), true",
+      "(5) < (4), false",
+      "(true)  || (true), true",
+      "(true)  || (false), true",
+      "(false) || (true), true",
+      "(false) || (false), false",
+      "(true)  && (true), true",
+      "(true)  && (false), false",
+      "(false) && (true), false",
+      "(false) && (false), false",
+  })
+  public void simpleStringComparison(String condition, boolean expected) throws ParseException {
+    assertIfIsTrueOrFalse(condition, expected);
+  }
+
+  private void assertIfIsTrueOrFalse(String ifCondition, boolean expectedTrue)
+      throws ParseException {
+    String input = getPrefix()
+        + "# if " + ifCondition + "\n"
+        + "true\n"
+        + "# end if";
+    assertThat(getResult(new PhaseContext(), input))
+        .isEqualTo(expectedTrue ? "true" : "");
+
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllValues)
+        .asInstanceOf(map(String.class, Object.class))
+        .hasSize(0);
     assertThat(getContext(new PhaseContext(), input))
         .extracting(RenderContext::getAllActions)
         .asInstanceOf(list(Action.class))

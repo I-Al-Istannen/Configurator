@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import de.ialistannen.configurator.context.Action;
+import de.ialistannen.configurator.dsl.comparison.ComparisonAstNode;
 import de.ialistannen.configurator.dsl.script.PythonScript;
 import de.ialistannen.configurator.util.ParseException;
 import de.ialistannen.configurator.util.StringReader;
@@ -143,6 +144,20 @@ class DslParserTest {
     assertThat(result).isEqualTo(wrapInBlock(
         new LiteralAstNode("\n"),
         new AssignmentAstNode("user", new LiteralAstNode("test"))
+    ));
+  }
+
+  @Test
+  public void parseIf() throws ParseException {
+    String input = "# if (hey) = (you)\n"
+        + "hey"
+        + "# end if";
+    AstNode result = getParsedResult(input);
+    assertThat(result).isEqualTo(wrapInBlock(
+        new IfAstNode(
+            new ComparisonAstNode(new LiteralAstNode("hey"), new LiteralAstNode("you"), null),
+            new LiteralAstNode("hey")
+        )
     ));
   }
 

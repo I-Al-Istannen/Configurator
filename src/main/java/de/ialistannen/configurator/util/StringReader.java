@@ -256,6 +256,33 @@ public class StringReader {
   }
 
   /**
+   * Reads a string that is enclosed by parenthesis i.e. '(' and ')'.
+   *
+   * @return the enclosed text
+   * @throws ParseException if there is a syntax error
+   */
+  public String readEnclosedByParentheses() throws ParseException {
+    assertRead("(");
+    StringBuilder readString = new StringBuilder();
+
+    int depth = 1;
+    while (canRead()) {
+      char read = readChar();
+
+      if (read == '(') {
+        depth++;
+      } else if (read == ')') {
+        depth--;
+        if (depth == 0) {
+          return readString.toString();
+        }
+      }
+      readString.append(read);
+    }
+    throw new ParseException(this, "Did not find a closing parenthesis");
+  }
+
+  /**
    * A parser that reads everything between the marker
    *
    * @param startMarker the marker that must appear at the start and end

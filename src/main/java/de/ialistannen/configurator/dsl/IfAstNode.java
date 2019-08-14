@@ -9,8 +9,8 @@ import lombok.Data;
 @Data
 public class IfAstNode implements AstNode {
 
-  private ComparisonAstNode condition;
-  private AstNode content;
+  private final ComparisonAstNode condition;
+  private final AstNode content;
 
   @Override
   public <T> T accept(AstVisitor<T> visitor) {
