@@ -74,4 +74,12 @@ public interface RenderContext {
    * @return the actions
    */
   List<Action> getAllActions();
+
+  /**
+   * Merges the two contexts. Keeps the keys of this context if there are conflicts.
+   *
+   * @param other the other context
+   * @return the merged context
+   */
+  RenderContext merge(RenderContext other);
 }

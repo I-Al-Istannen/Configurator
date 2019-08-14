@@ -87,6 +87,11 @@ public class PythonScript implements Script {
     public List<Action> getAllActions() {
       return underlying.getAllActions();
     }
+
+    @Override
+    public RenderContext merge(RenderContext other) {
+      return underlying.merge(other);
+    }
   }
 
   public static void main(String[] args) {
