@@ -104,8 +104,9 @@ public class DslParser {
   private AstNode readAssignment() throws ParseException {
     input.readWhile(Character::isWhitespace);
     String name = input.readWhile(it -> !Character.isWhitespace(it));
+    input.readWhile(Character::isWhitespace);
 
-    input.assertRead(" = ");
+    input.assertRead("= ");
     AstNode value = parseSection(false);
 
     return new AssignmentAstNode(name, value);
