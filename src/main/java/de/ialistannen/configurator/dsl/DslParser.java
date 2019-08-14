@@ -39,12 +39,25 @@ public class DslParser {
    * @throws ParseException if the input is invalid
    */
   public AstNode parse() throws ParseException {
-    parseCommandPrefix();
+    return parse(true);
+  }
+
+  /**
+   * Parses the source to an {@link AstNode}.
+   *
+   * @param withNewline whether to include a trailing newline
+   * @return the parsed ast node
+   * @throws ParseException if the input is invalid
+   */
+  private AstNode parse(boolean withNewline) throws ParseException {
+    if (commandPrefix == null) {
+      parseCommandPrefix();
+    }
 
     List<AstNode> children = new ArrayList<>();
 
     while (input.canRead()) {
-      children.add(parseSection(true));
+      children.add(parseSection(withNewline));
     }
 
     return new BlockAstNode(children);
@@ -64,6 +77,7 @@ public class DslParser {
   /**
    * Parses a line or block, depending on the next chars.
    *
+   * @param withNewline whether to include a trailing newline
    * @return the parse result
    */
   private AstNode parseSection(boolean withNewline) throws ParseException {
@@ -122,7 +136,10 @@ public class DslParser {
     return readNamedEnclosed(
         "if",
         (condition, content) -> {
-          AstNode contentNode = parseSectionOnString(content, false);
+          AstNode contentNode = new DslParser(
+              new StringReader(content), commandPrefix
+          )
+              .parse(false);
           ComparisonAstNode comparison = new DslParser(
               new StringReader(condition), commandPrefix
           ).readComparison();

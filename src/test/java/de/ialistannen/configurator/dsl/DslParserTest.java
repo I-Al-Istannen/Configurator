@@ -149,14 +149,14 @@ class DslParserTest {
 
   @Test
   public void parseIf() throws ParseException {
-    String input = "# if (hey) = (you)\n"
-        + "hey"
+    String input = "# if (hey) == (you)\n"
+        + "hey\n"
         + "# end if";
     AstNode result = getParsedResult(input);
     assertThat(result).isEqualTo(wrapInBlock(
         new IfAstNode(
             new ComparisonAstNode(new LiteralAstNode("hey"), new LiteralAstNode("you"), null),
-            new LiteralAstNode("hey")
+            wrapInBlock(new LiteralAstNode("hey"))
         )
     ));
   }

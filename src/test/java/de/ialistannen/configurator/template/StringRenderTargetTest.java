@@ -220,6 +220,26 @@ class StringRenderTargetTest {
         .isEmpty();
   }
 
+  @Test
+  public void multiStatementIf() throws ParseException {
+    String input = getPrefix()
+        + "# if (true) == (true)\n"
+        + "true\n"
+        + "# a = b"
+        + "# end if";
+    assertThat(getResult(new PhaseContext(), input))
+        .isEqualTo("true");
+
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllValues)
+        .asInstanceOf(map(String.class, Object.class))
+        .containsExactly(new SimpleEntry<>("a", "b"));
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllActions)
+        .asInstanceOf(list(Action.class))
+        .isEmpty();
+  }
+
   private String getResult(RenderContext context, String input) throws ParseException {
     return new StringRenderTarget(input).render(context).getFirst().asString();
   }
