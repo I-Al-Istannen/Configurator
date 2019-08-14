@@ -1,7 +1,6 @@
 package de.ialistannen.configurator.dsl.script;
 
 import de.ialistannen.configurator.context.Action;
-import de.ialistannen.configurator.context.PhaseContext;
 import de.ialistannen.configurator.context.RenderContext;
 import java.util.List;
 import java.util.Map;
@@ -93,12 +92,4 @@ public class PythonScript implements Script {
       return underlying.merge(other);
     }
   }
-
-  public static void main(String[] args) {
-    RenderContext context = new PhaseContext();
-    String script = "context.storeValue(\"Hello\", 20);";
-//    String script = "print(dir(context))";
-    System.out.println(new PythonScript(script).execute(context));
-  }
-
 }

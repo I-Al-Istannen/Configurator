@@ -7,10 +7,12 @@ import de.ialistannen.configurator.dsl.AstNode;
 import de.ialistannen.configurator.dsl.AstVisitor;
 import de.ialistannen.configurator.dsl.BlockAstNode;
 import de.ialistannen.configurator.dsl.DslParser;
+import de.ialistannen.configurator.dsl.IfAstNode;
 import de.ialistannen.configurator.dsl.LiteralAstNode;
 import de.ialistannen.configurator.dsl.ScriptAstNode;
 import de.ialistannen.configurator.dsl.ShellCommandAstNode;
 import de.ialistannen.configurator.dsl.VariableAstNode;
+import de.ialistannen.configurator.dsl.comparison.ComparisonAstNode;
 import de.ialistannen.configurator.rendering.RenderTarget;
 import de.ialistannen.configurator.rendering.StringRenderedObject;
 import de.ialistannen.configurator.util.Pair;
@@ -99,6 +101,23 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
     @Override
     public String visitScript(ScriptAstNode node) {
       context = node.getScript().execute(context);
+      return "";
+    }
+
+    @Override
+    public String acceptComparisonAstNode(ComparisonAstNode node) {
+      String left = node.getLeft().accept(this);
+      String right = node.getRight().accept(this);
+      return node.getComparisonFunction().apply(left, right).toString();
+    }
+
+    @Override
+    public String acceptIfAstNode(IfAstNode node) {
+      ComparisonAstNode condition = node.getCondition();
+      String result = condition.accept(this);
+      if (result.equals("true")) {
+        return node.getContent().accept(this);
+      }
       return "";
     }
   }

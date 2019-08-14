@@ -1,5 +1,7 @@
 package de.ialistannen.configurator.dsl;
 
+import de.ialistannen.configurator.dsl.comparison.ComparisonAstNode;
+
 /**
  * An ast visitor that may traverse the whole tree.
  *
@@ -62,4 +64,20 @@ public interface AstVisitor<T> {
    * @return the return value this visitor chose
    */
   T visitScript(ScriptAstNode node);
+
+  /**
+   * Called for each comparison node.
+   *
+   * @param node the comparison node
+   * @return the return value this visitor chose
+   */
+  T acceptComparisonAstNode(ComparisonAstNode node);
+
+  /**
+   * Called for each if node.
+   *
+   * @param node the if node
+   * @return the return value this visitor chose
+   */
+  T acceptIfAstNode(IfAstNode node);
 }
