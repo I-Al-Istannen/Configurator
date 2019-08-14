@@ -6,11 +6,13 @@ import de.ialistannen.configurator.context.RenderContext;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.Data;
 import org.graalvm.polyglot.Context;
 
 /**
  * A python script.
  */
+@Data
 public class PythonScript implements Script {
 
   private String script;

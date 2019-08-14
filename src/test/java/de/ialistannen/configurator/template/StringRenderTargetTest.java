@@ -149,6 +149,26 @@ class StringRenderTargetTest {
         .containsExactly(new Action("Test me!", "am content 'ä'\n"));
   }
 
+  @Test
+  public void pythonScriptRun() throws ParseException {
+    String input = getPrefix()
+        + "# script python\n"
+        + "context.storeValue(\"Hey\", 20)\n"
+        + "# end script";
+    assertThat(getResult(new PhaseContext(), input))
+        .isEqualTo("");
+
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllValues)
+        .asInstanceOf(map(String.class, Object.class))
+        .containsEntry("Hey", 20)
+        .hasSize(1);
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllActions)
+        .asInstanceOf(list(Action.class))
+        .isEmpty();
+  }
+
   private String getResult(RenderContext context, String input) throws ParseException {
     return new StringRenderTarget(input).render(context).getFirst().asString();
   }

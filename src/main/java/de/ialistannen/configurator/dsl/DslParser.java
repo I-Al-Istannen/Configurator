@@ -1,6 +1,7 @@
 package de.ialistannen.configurator.dsl;
 
 import de.ialistannen.configurator.context.Action;
+import de.ialistannen.configurator.dsl.script.PythonScript;
 import de.ialistannen.configurator.util.ParseException;
 import de.ialistannen.configurator.util.StringReader;
 import java.util.ArrayList;
@@ -99,18 +100,34 @@ public class DslParser {
     input.assertRead(commandPrefix);
 
     input.readWhile(Character::isWhitespace);
-    if (input.peekWhile(it -> !Character.isWhitespace(it)).equals("action")) {
+    String firstWord = input.peekWhile(it -> !Character.isWhitespace(it));
+    if (firstWord.equals("action")) {
       return readAction();
+    } else if (firstWord.equals("script")) {
+      return readScript();
     }
 
     // TODO: Ifs?
     return readAssignment();
   }
 
-  private AstNode readAction() throws ParseException {
-    input.assertRead("action");
+  private AstNode readScript() throws ParseException {
+    return readNamedEnclosed(
+        "script",
+        (lang, content) -> {
+          if (!lang.equals("python")) {
+            throw new ParseException(input, "Unknown language");
+          }
+          return new ScriptAstNode(new PythonScript(content));
+        }
+    );
+  }
+
+  private AstNode readNamedEnclosed(String start, NamedSectionParser creator)
+      throws ParseException {
+    input.assertRead(start);
     input.readWhile(Character::isWhitespace);
-    final String END_MARKER = commandPrefix + " end action";
+    final String END_MARKER = commandPrefix + " end " + start;
 
     String name = input.readLine();
     String content = this.input.readUntil(END_MARKER);
@@ -120,7 +137,13 @@ public class DslParser {
       this.input.assertRead(System.lineSeparator());
     }
 
-    return new ActionAstNode(new Action(name, content));
+    return creator.create(name, content);
+  }
+
+  private AstNode readAction() throws ParseException {
+    return readNamedEnclosed("action",
+        (name, content) -> new ActionAstNode(new Action(name, content))
+    );
   }
 
   private AstNode readAssignment() throws ParseException {
@@ -185,5 +208,10 @@ public class DslParser {
   private interface ParsingSupplier {
 
     AstNode parse() throws ParseException;
+  }
+
+  private interface NamedSectionParser {
+
+    AstNode create(String name, String content) throws ParseException;
   }
 }

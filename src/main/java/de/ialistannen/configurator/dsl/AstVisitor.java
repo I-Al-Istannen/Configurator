@@ -54,4 +54,12 @@ public interface AstVisitor<T> {
    * @return the return value this visitor chose
    */
   T visitAction(ActionAstNode node);
+
+  /**
+   * Called for each script.
+   *
+   * @param node the script
+   * @return the return value this visitor chose
+   */
+  T visitScript(ScriptAstNode node);
 }

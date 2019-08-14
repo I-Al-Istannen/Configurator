@@ -8,6 +8,7 @@ import de.ialistannen.configurator.dsl.AstVisitor;
 import de.ialistannen.configurator.dsl.BlockAstNode;
 import de.ialistannen.configurator.dsl.DslParser;
 import de.ialistannen.configurator.dsl.LiteralAstNode;
+import de.ialistannen.configurator.dsl.ScriptAstNode;
 import de.ialistannen.configurator.dsl.ShellCommandAstNode;
 import de.ialistannen.configurator.dsl.VariableAstNode;
 import de.ialistannen.configurator.rendering.RenderTarget;
@@ -92,6 +93,12 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
     @Override
     public String visitAction(ActionAstNode node) {
       context = context.storeAction(node.getAction());
+      return "";
+    }
+
+    @Override
+    public String visitScript(ScriptAstNode node) {
+      context = node.getScript().execute(context);
       return "";
     }
   }
