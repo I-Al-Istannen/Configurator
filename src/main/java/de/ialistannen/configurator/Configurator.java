@@ -1,12 +1,20 @@
 package de.ialistannen.configurator;
 
+import static de.ialistannen.configurator.output.ColoredOutput.colorErr;
+import static de.ialistannen.configurator.output.ColoredOutput.colorOut;
+import static de.ialistannen.configurator.output.TerminalColor.GRAY;
+import static de.ialistannen.configurator.output.TerminalColor.RED;
+
 import de.ialistannen.configurator.config.Config;
 import de.ialistannen.configurator.context.PhaseContext;
 import de.ialistannen.configurator.context.RenderContext;
 import de.ialistannen.configurator.exception.DistributionException;
+import de.ialistannen.configurator.execution.ActionDistributor;
 import de.ialistannen.configurator.execution.DirBasedActionDistributor;
+import de.ialistannen.configurator.execution.DryActionDistributor;
 import de.ialistannen.configurator.execution.DryFileDistributor;
 import de.ialistannen.configurator.execution.Reactor;
+import de.ialistannen.configurator.output.ColoredOutput;
 import de.ialistannen.configurator.phases.MultiTargetRenderer;
 import de.ialistannen.configurator.phases.RenderTargetCollector;
 import de.ialistannen.configurator.rendering.FileRenderedObject;
@@ -31,6 +39,7 @@ public class Configurator {
 
   private static final String DRY_RUN = "d";
   private static final String PRINT_CONTENTS = "f";
+  private static final String STRIP_COLOR = "c";
 
   public static void main(String[] args) throws IOException {
     CommandLineParser parser = new DefaultParser();
@@ -38,7 +47,7 @@ public class Configurator {
     try {
       cmd = parser.parse(getOptions(), args);
     } catch (ParseException e) {
-      System.err.println(e.getMessage());
+      colorErr(RED + e.getMessage());
       new HelpFormatter().printHelp(
           "configurator",
           "A simple program to help organize dotfiles.",
@@ -48,6 +57,8 @@ public class Configurator {
       );
       return;
     }
+
+    ColoredOutput.setStripColour(cmd.hasOption(STRIP_COLOR));
 
     Path basePath = getOwnPath();
     Path configPath = basePath.resolve(".configurator.yaml");
@@ -64,11 +75,17 @@ public class Configurator {
         new PhaseContext()
     );
 
-    System.out.println("Final context is " + rendered.getSecond());
+    colorOut(GRAY + "Final context is " + rendered.getSecond());
     new DryFileDistributor(cmd.hasOption(PRINT_CONTENTS)).distributeFiles(rendered.getFirst());
 
     try {
-      new DirBasedActionDistributor().distributeActions(rendered.getSecond());
+      ActionDistributor distributor;
+      if (cmd.hasOption(DRY_RUN)) {
+        distributor = new DryActionDistributor(cmd.hasOption(PRINT_CONTENTS));
+      } else {
+        distributor = new DirBasedActionDistributor();
+      }
+      distributor.distributeActions(rendered.getSecond());
     } catch (DistributionException e) {
       e.printStackTrace();
     }
@@ -89,6 +106,14 @@ public class Configurator {
         .longOpt("print-contents")
         .hasArg(false)
         .desc("Whether the program should print the whole file contents when running in dry mode.")
+        .type(Boolean.class)
+        .build()
+    );
+    options.addOption(Option.builder(STRIP_COLOR)
+        .argName("Strip color")
+        .longOpt("strip-color")
+        .hasArg(false)
+        .desc("If present the program will not color its output.")
         .type(Boolean.class)
         .build()
     );

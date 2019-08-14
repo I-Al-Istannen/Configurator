@@ -1,5 +1,10 @@
 package de.ialistannen.configurator.execution;
 
+import static de.ialistannen.configurator.output.ColoredOutput.colorOut;
+import static de.ialistannen.configurator.output.TerminalColor.BRIGHT_MAGENTA;
+import static de.ialistannen.configurator.output.TerminalColor.GRAY;
+import static de.ialistannen.configurator.output.TerminalColor.GREEN;
+
 import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.context.RenderContext;
 
@@ -22,9 +27,9 @@ public class DryActionDistributor implements ActionDistributor {
   @Override
   public void distributeActions(RenderContext context) {
     for (Action action : context.getAllActions()) {
-      System.out.println("Action: " + action.getName());
+      colorOut(BRIGHT_MAGENTA + "Action: " + GREEN + action.getName());
       if (printFileContents) {
-        System.out.println(action.getContent());
+        colorOut(GRAY + action.getContent());
       }
     }
   }
