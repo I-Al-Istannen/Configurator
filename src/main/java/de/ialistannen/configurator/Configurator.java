@@ -3,6 +3,8 @@ package de.ialistannen.configurator;
 import de.ialistannen.configurator.config.Config;
 import de.ialistannen.configurator.context.PhaseContext;
 import de.ialistannen.configurator.context.RenderContext;
+import de.ialistannen.configurator.exception.DistributionException;
+import de.ialistannen.configurator.execution.DirBasedActionDistributor;
 import de.ialistannen.configurator.execution.DryFileDistributor;
 import de.ialistannen.configurator.execution.Reactor;
 import de.ialistannen.configurator.phases.MultiTargetRenderer;
@@ -20,6 +22,7 @@ import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -30,30 +33,19 @@ public class Configurator {
   private static final String PRINT_CONTENTS = "f";
 
   public static void main(String[] args) throws IOException {
-    Options options = new Options();
-    options.addOption(Option.builder(DRY_RUN)
-        .argName("Dry run")
-        .longOpt("dry")
-        .hasArg(false)
-        .desc("Whether the program should run without altering files.")
-        .type(Boolean.class)
-        .build()
-    );
-    options.addOption(Option.builder(PRINT_CONTENTS)
-        .argName("Print contents")
-        .longOpt("print-contents")
-        .hasArg(false)
-        .desc("Whether the program should print the whole file contents when running in dry mode.")
-        .type(Boolean.class)
-        .build()
-    );
-
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
     try {
-      cmd = parser.parse(options, args);
+      cmd = parser.parse(getOptions(), args);
     } catch (ParseException e) {
-      e.printStackTrace();
+      System.err.println(e.getMessage());
+      new HelpFormatter().printHelp(
+          "configurator",
+          "A simple program to help organize dotfiles.",
+          getOptions(),
+          "Created mostly to play around a bit.",
+          true
+      );
       return;
     }
 
@@ -74,6 +66,33 @@ public class Configurator {
 
     System.out.println("Final context is " + rendered.getSecond());
     new DryFileDistributor(cmd.hasOption(PRINT_CONTENTS)).distributeFiles(rendered.getFirst());
+
+    try {
+      new DirBasedActionDistributor().distributeActions(rendered.getSecond());
+    } catch (DistributionException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private static Options getOptions() {
+    Options options = new Options();
+    options.addOption(Option.builder(DRY_RUN)
+        .argName("Dry run")
+        .longOpt("dry")
+        .hasArg(false)
+        .desc("Whether the program should run without altering files.")
+        .type(Boolean.class)
+        .build()
+    );
+    options.addOption(Option.builder(PRINT_CONTENTS)
+        .argName("Print contents")
+        .longOpt("print-contents")
+        .hasArg(false)
+        .desc("Whether the program should print the whole file contents when running in dry mode.")
+        .type(Boolean.class)
+        .build()
+    );
+    return options;
   }
 
   private static Path getOwnPath() {
@@ -82,7 +101,7 @@ public class Configurator {
 //          Configurator.class.getProtectionDomain().getCodeSource().getLocation().toURI()
 //      );
       return Paths.get(
-          new URI("file:/home/i_al_istannen/Programming/Random/Configurator/src/test/resources")
+          new URI("file:/home/i_al_istannen/configurator")
       );
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
