@@ -1,8 +1,10 @@
 package de.ialistannen.configurator.template;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.list;
 import static org.assertj.core.api.InstanceOfAssertFactories.map;
 
+import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.context.PhaseContext;
 import de.ialistannen.configurator.context.RenderContext;
 import de.ialistannen.configurator.util.ParseException;
@@ -126,6 +128,25 @@ class StringRenderTargetTest {
         .extracting(RenderContext::getAllValues)
         .asInstanceOf(map(String.class, Object.class))
         .isEmpty();
+  }
+
+  @Test
+  public void actionAdded() throws ParseException {
+    String input = getPrefix()
+        + "# action Test me!\n"
+        + "am content 'ä'\n"
+        + "# end action";
+    assertThat(getResult(new PhaseContext(), input))
+        .isEqualTo("");
+
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllValues)
+        .asInstanceOf(map(String.class, Object.class))
+        .isEmpty();
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllActions)
+        .asInstanceOf(list(Action.class))
+        .containsExactly(new Action("Test me!", "am content 'ä'\n"));
   }
 
   private String getResult(RenderContext context, String input) throws ParseException {
