@@ -1,5 +1,6 @@
 package de.ialistannen.configurator.context;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -42,4 +43,35 @@ public interface RenderContext {
    * @return all values
    */
   Map<String, Object> getAllValues();
+
+  /**
+   * Stores a new action.
+   *
+   * @param action the action
+   * @return the new render context
+   */
+  RenderContext storeAction(Action action);
+
+  /**
+   * Returns the action with the given name.
+   *
+   * @param name the name of the action
+   * @return the action or null
+   */
+  Action getAction(String name);
+
+  /**
+   * Returns the action with the given name.
+   *
+   * @param name the name of the action
+   * @return the action or null
+   */
+  Optional<Action> getActionOpt(String name);
+
+  /**
+   * Returns all actionS.
+   *
+   * @return the actions
+   */
+  List<Action> getAllActions();
 }

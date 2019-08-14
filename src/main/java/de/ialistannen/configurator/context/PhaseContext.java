@@ -1,8 +1,12 @@
 package de.ialistannen.configurator.context;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.pcollections.HashPMap;
@@ -13,16 +17,14 @@ import org.pcollections.HashTreePMap;
  */
 @ToString
 @EqualsAndHashCode
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class PhaseContext implements RenderContext {
 
   private HashPMap<String, Object> values;
+  private HashPMap<String, Action> actions;
 
   public PhaseContext() {
-    this(Collections.emptyMap());
-  }
-
-  public PhaseContext(Map<String, Object> entries) {
-    this.values = HashTreePMap.from(entries);
+    this(HashTreePMap.empty(), HashTreePMap.empty());
   }
 
   @Override
@@ -39,11 +41,31 @@ public class PhaseContext implements RenderContext {
 
   @Override
   public <T> PhaseContext storeValue(String key, T val) {
-    return new PhaseContext(values.plus(key, val));
+    return new PhaseContext(values.plus(key, val), actions);
   }
 
   @Override
   public Map<String, Object> getAllValues() {
     return Collections.unmodifiableMap(values);
+  }
+
+  @Override
+  public RenderContext storeAction(Action action) {
+    return new PhaseContext(values, actions.plus(action.getName(), action));
+  }
+
+  @Override
+  public Action getAction(String name) {
+    return actions.get(name);
+  }
+
+  @Override
+  public Optional<Action> getActionOpt(String name) {
+    return Optional.ofNullable(getAction(name));
+  }
+
+  @Override
+  public List<Action> getAllActions() {
+    return new ArrayList<>(actions.values());
   }
 }
