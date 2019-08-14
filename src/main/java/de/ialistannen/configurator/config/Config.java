@@ -4,19 +4,16 @@ import de.ialistannen.configurator.phases.Phase;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import lombok.AllArgsConstructor;
+import java.util.Map;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
 @Data
 @ToString
 public class Config {
 
-  private List<String> phases;
+  private final List<String> phases;
 
   /**
    * Returns the names of all phases.
@@ -51,19 +48,17 @@ public class Config {
    * @return the config
    */
   public static Config loadConfig(String content) {
-    Constructor constructor = new Constructor(Config.class);
-    TypeDescription typeDescription = new TypeDescription(Config.class);
-    typeDescription.addPropertyParameters("phases", String.class);
-    return new Yaml(constructor).load(content);
+    Map<String, Object> map = new Yaml().load(content);
+    @SuppressWarnings("unchecked")
+    List<String> phases = (List<String>) map.get("phases");
+    return new Config(phases);
   }
 
-  @ToString
-  @EqualsAndHashCode
-  @AllArgsConstructor
+  @Data
   private static class SimplePhase implements Phase {
 
-    private String identifier;
-    private int priority;
+    private final String identifier;
+    private final int priority;
 
     @Override
     public String identifier() {
