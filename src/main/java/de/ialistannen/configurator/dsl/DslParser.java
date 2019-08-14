@@ -1,5 +1,6 @@
 package de.ialistannen.configurator.dsl;
 
+import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.util.ParseException;
 import de.ialistannen.configurator.util.StringReader;
 import java.util.ArrayList;
@@ -97,8 +98,29 @@ public class DslParser {
   private AstNode parseCommand() throws ParseException {
     input.assertRead(commandPrefix);
 
+    input.readWhile(Character::isWhitespace);
+    if (input.peekWhile(it -> !Character.isWhitespace(it)).equals("action")) {
+      return readAction();
+    }
+
     // TODO: Ifs?
     return readAssignment();
+  }
+
+  private AstNode readAction() throws ParseException {
+    input.assertRead("action");
+    input.readWhile(Character::isWhitespace);
+    final String END_MARKER = commandPrefix + " end action";
+
+    String name = input.readLine();
+    String content = this.input.readUntil(END_MARKER);
+
+    this.input.assertRead(END_MARKER);
+    if (this.input.peek(System.lineSeparator().length()).equals(System.lineSeparator())) {
+      this.input.assertRead(System.lineSeparator());
+    }
+
+    return new ActionAstNode(new Action(name, content));
   }
 
   private AstNode readAssignment() throws ParseException {

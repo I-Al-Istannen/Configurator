@@ -67,13 +67,28 @@ public class StringReader {
   }
 
   /**
-   * Returns the next {@code amount} chars or less, if the input ends before it
+   * Returns the next {@code amount} chars or less, if the input ends before it.
    *
    * @param amount the amount of chars to peek at
    * @return the read text
    */
   public String peek(int amount) {
     return underlying.substring(position, Math.min(underlying.length(), position + amount));
+  }
+
+  /**
+   * Returns the next chars that match the predicate.
+   *
+   * @param predicate the predicate
+   * @return the read text
+   */
+  public String peekWhile(Predicate<Character> predicate) {
+    int start = position;
+    String text = readWhile(predicate);
+
+    position = start;
+
+    return text;
   }
 
   /**

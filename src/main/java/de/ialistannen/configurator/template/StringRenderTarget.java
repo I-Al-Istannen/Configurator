@@ -1,6 +1,7 @@
 package de.ialistannen.configurator.template;
 
 import de.ialistannen.configurator.context.RenderContext;
+import de.ialistannen.configurator.dsl.ActionAstNode;
 import de.ialistannen.configurator.dsl.AssignmentAstNode;
 import de.ialistannen.configurator.dsl.AstNode;
 import de.ialistannen.configurator.dsl.AstVisitor;
@@ -85,6 +86,12 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
     @Override
     public String visitAssignment(AssignmentAstNode node) {
       context = context.storeValue(node.getName(), node.getValue().accept(this));
+      return "";
+    }
+
+    @Override
+    public String visitAction(ActionAstNode node) {
+      context = context.storeAction(node.getAction());
       return "";
     }
   }

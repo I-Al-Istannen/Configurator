@@ -46,4 +46,12 @@ public interface AstVisitor<T> {
    * @return the return value this visitor chose
    */
   T visitAssignment(AssignmentAstNode node);
+
+  /**
+   * Called for each action.
+   *
+   * @param node the action
+   * @return the return value this visitor chose
+   */
+  T visitAction(ActionAstNode node);
 }
