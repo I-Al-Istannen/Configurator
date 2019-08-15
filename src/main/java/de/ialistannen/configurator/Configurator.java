@@ -11,8 +11,8 @@ import de.ialistannen.configurator.context.RenderContext;
 import de.ialistannen.configurator.exception.DistributionException;
 import de.ialistannen.configurator.execution.ActionDistributor;
 import de.ialistannen.configurator.execution.DirBasedActionDistributor;
-import de.ialistannen.configurator.execution.DryActionDistributor;
-import de.ialistannen.configurator.execution.DryFileDistributor;
+import de.ialistannen.configurator.execution.FileDistributor;
+import de.ialistannen.configurator.execution.FileSystemFileDistributor;
 import de.ialistannen.configurator.execution.Reactor;
 import de.ialistannen.configurator.output.ColoredOutput;
 import de.ialistannen.configurator.phases.MultiTargetRenderer;
@@ -76,16 +76,16 @@ public class Configurator {
     );
 
     colorOut(GRAY + "Final context is " + rendered.getSecond());
-    new DryFileDistributor(cmd.hasOption(PRINT_CONTENTS)).distributeFiles(rendered.getFirst());
 
     try {
-      ActionDistributor distributor;
-      if (cmd.hasOption(DRY_RUN)) {
-        distributor = new DryActionDistributor(cmd.hasOption(PRINT_CONTENTS));
-      } else {
-        distributor = new DirBasedActionDistributor();
-      }
-      distributor.distributeActions(rendered.getSecond());
+      boolean dry = cmd.hasOption(DRY_RUN);
+      boolean printFileContents = cmd.hasOption(PRINT_CONTENTS);
+
+      ActionDistributor actionDistributor = new DirBasedActionDistributor(dry, printFileContents);
+      FileDistributor fileDistributor = new FileSystemFileDistributor(dry, printFileContents);
+
+      fileDistributor.distributeFiles(rendered.getFirst());
+      actionDistributor.distributeActions(rendered.getSecond());
     } catch (DistributionException e) {
       e.printStackTrace();
     }

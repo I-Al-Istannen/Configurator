@@ -1,5 +1,6 @@
 package de.ialistannen.configurator.execution;
 
+import de.ialistannen.configurator.exception.DistributionException;
 import de.ialistannen.configurator.rendering.FileRenderedObject;
 import java.util.List;
 
@@ -13,6 +14,7 @@ public interface FileDistributor {
    * etc.) is up to the implementing class.
    *
    * @param renderedObjects the rendered objects
+   * @throws DistributionException if an error occurs
    */
-  void distributeFiles(List<FileRenderedObject> renderedObjects);
+  void distributeFiles(List<FileRenderedObject> renderedObjects) throws DistributionException;
 }
