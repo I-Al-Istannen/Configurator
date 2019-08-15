@@ -103,8 +103,13 @@ public class DslParser {
 
       if (reader.peek(2).equals("{{")) {
         reader.assertRead("{{");
-        children.add(readInnerExpression(reader));
-        reader.assertRead("}}");
+        Optional<AstNode> innerResult = tryParse(() -> readInnerExpression(reader), reader);
+        if (innerResult.isPresent()) {
+          children.add(innerResult.get());
+          reader.assertRead("}}");
+        } else {
+          children.add(new LiteralAstNode("{{"));
+        }
       }
     }
 

@@ -1,7 +1,6 @@
 package de.ialistannen.configurator.dsl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.dsl.comparison.ComparisonAstNode;
@@ -22,14 +21,8 @@ class DslParserTest {
       "{{$hey you}}, hey you",
       "{{$hey_you}}, hey_you",
       "{{$1234}}, 1234",
-      "{{hey_you}}, null",
   })
   public void parseVariable(String input, String expectedName) throws ParseException {
-    if (expectedName.equals("null")) {
-      assertThatExceptionOfType(ParseException.class)
-          .isThrownBy(() -> getParsedResult(input));
-      return;
-    }
     assertThat(getParsedResult(input)).isEqualTo(
         wrapInBlock(new VariableAstNode(expectedName, Collections.emptyList()))
     );
@@ -42,8 +35,15 @@ class DslParserTest {
       "hey_you}}, hey_you}}",
       "1234, 1234",
       "{!{hey_you}}, {!{hey_you}}",
+      "{{hey_you}}, {{hey_you}}",
   })
   public void parseLiteral(String input, String expected) throws ParseException {
+    if (expected.contains("{{")) {
+      assertThat(getParsedResult(input)).isEqualTo(wrapInBlock(
+          wrapInBlock(new LiteralAstNode("{{"), new LiteralAstNode(expected.substring(2)))
+      ));
+      return;
+    }
     assertThat(getParsedResult(input)).isEqualTo(
         wrapInBlock(new LiteralAstNode(expected))
     );
