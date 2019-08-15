@@ -36,9 +36,25 @@
               <goal>shade</goal>
             </goals>
           </execution>
+          <execution>
+            <id>shade-no-graal</id>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <finalName>${project.name}-no-script</finalName>
+              <artifactSet>
+                <excludes>
+                  <exclude>org.graalvm.*:*:*</exclude>
+                </excludes>
+              </artifactSet>
+            </configuration>
+          </execution>
         </executions>
         <configuration>
           <finalName>${project.name}</finalName>
+          <minimizeJar>true</minimizeJar>
           <transformers>
             <transformer
               implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
@@ -69,12 +85,7 @@
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>1.18.8</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.yaml</groupId>
-      <artifactId>snakeyaml</artifactId>
-      <version>1.24</version>
+      <scope>provided</scope>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->

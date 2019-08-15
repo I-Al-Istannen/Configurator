@@ -1,13 +1,13 @@
 package de.ialistannen.configurator.config;
 
 import de.ialistannen.configurator.phases.Phase;
+import de.ialistannen.configurator.util.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.regex.Pattern;
 import lombok.Data;
 import lombok.ToString;
-import org.yaml.snakeyaml.Yaml;
 
 @Data
 @ToString
@@ -48,9 +48,19 @@ public class Config {
    * @return the config
    */
   public static Config loadConfig(String content) {
-    Map<String, Object> map = new Yaml().load(content);
-    @SuppressWarnings("unchecked")
-    List<String> phases = (List<String>) map.get("phases");
+    List<String> phases = new ArrayList<>();
+    StringReader reader = new StringReader(content);
+
+    if (!reader.readLine().trim().equals("phases:")) {
+      throw new IllegalArgumentException("Invalid config, expected 'phases:' at the start");
+    }
+
+    while (reader.canRead()) {
+      reader.readRegex(Pattern.compile("\\s*-\\s*"));
+      String phaseName = reader.readLine();
+      phases.add(phaseName);
+    }
+
     return new Config(phases);
   }
 
