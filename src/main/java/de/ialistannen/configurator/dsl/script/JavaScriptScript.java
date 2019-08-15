@@ -7,12 +7,13 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.Data;
 import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.HostAccess.Export;
 
 /**
  * A python script.
  */
 @Data
-public class PythonScript implements Script {
+public class JavaScriptScript implements Script {
 
   private String script;
 
@@ -21,19 +22,19 @@ public class PythonScript implements Script {
    *
    * @param script the python script
    */
-  public PythonScript(String script) {
+  public JavaScriptScript(String script) {
     this.script = script;
   }
 
   @Override
   public RenderContext execute(RenderContext initial) {
     StatefulContextHolder contextHolder = new StatefulContextHolder(initial);
-    Context context = Context.newBuilder("python")
+    Context context = Context.newBuilder("js")
         .allowAllAccess(true)
         .build();
-    context.getBindings("python").putMember("context", contextHolder);
+    context.getBindings("js").putMember("context", contextHolder);
 
-    context.eval("python", script);
+    context.eval("js", script);
     return contextHolder.underlying;
   }
 
@@ -66,6 +67,7 @@ public class PythonScript implements Script {
       return underlying.getAllValues();
     }
 
+    @Export
     @Override
     public RenderContext storeAction(Action action) {
       underlying = underlying.storeAction(action);

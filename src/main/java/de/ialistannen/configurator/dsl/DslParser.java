@@ -2,7 +2,7 @@ package de.ialistannen.configurator.dsl;
 
 import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.dsl.comparison.ComparisonAstNode;
-import de.ialistannen.configurator.dsl.script.PythonScript;
+import de.ialistannen.configurator.dsl.script.JavaScriptScript;
 import de.ialistannen.configurator.util.ParseException;
 import de.ialistannen.configurator.util.StringReader;
 import java.util.ArrayList;
@@ -197,10 +197,10 @@ public class DslParser {
     return readNamedEnclosed(
         "script",
         (lang, content) -> {
-          if (!lang.equals("python")) {
+          if (!lang.equals("js")) {
             throw new ParseException(input, "Unknown language");
           }
-          return new ScriptAstNode(new PythonScript(content));
+          return new ScriptAstNode(new JavaScriptScript(content));
         }
     );
   }

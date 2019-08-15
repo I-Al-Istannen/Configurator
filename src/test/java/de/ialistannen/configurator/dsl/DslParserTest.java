@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.dsl.comparison.ComparisonAstNode;
-import de.ialistannen.configurator.dsl.script.PythonScript;
+import de.ialistannen.configurator.dsl.script.JavaScriptScript;
 import de.ialistannen.configurator.util.ParseException;
 import de.ialistannen.configurator.util.StringReader;
 import java.util.Arrays;
@@ -126,14 +126,14 @@ class DslParserTest {
   }
 
   @Test
-  public void parsePythonScript() throws ParseException {
+  public void parseJsScript() throws ParseException {
     String content = "hello world\n"
         + "'hey'\n";
-    String input = "# script python\n"
+    String input = "# script js\n"
         + content
         + "# end script";
     assertThat(getParsedResult(input)).isEqualTo(
-        wrapInBlock(new ScriptAstNode(new PythonScript(content)))
+        wrapInBlock(new ScriptAstNode(new JavaScriptScript(content)))
     );
   }
 

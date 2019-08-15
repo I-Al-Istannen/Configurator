@@ -152,9 +152,9 @@ class StringRenderTargetTest {
   }
 
   @Test
-  public void pythonScriptRun() throws ParseException {
+  public void jsScriptRun() throws ParseException {
     String input = getPrefix()
-        + "# script python\n"
+        + "# script js\n"
         + "context.storeValue(\"Hey\", 20)\n"
         + "# end script";
     assertThat(getResult(new PhaseContext(), input))
