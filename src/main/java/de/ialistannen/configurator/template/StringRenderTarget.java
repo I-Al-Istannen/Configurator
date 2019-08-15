@@ -90,10 +90,19 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
 
     @Override
     public String visitVariable(VariableAstNode node) {
-      return context.<String>getValueOpt(node.getName())
+      String value = context.<String>getValueOpt(node.getName())
           .orElseThrow(
               () -> new NoSuchElementException("Unknown variable: '" + node.getName() + "'")
           );
+      if (node.getExtraArguments().contains("rgb")) {
+        String withoutPound = value.replace("#", "");
+        int colorInt = Integer.parseInt(withoutPound, 16);
+        int red = (colorInt & 0xFF0000) >> 16;
+        int green = (colorInt & 0x00FF00) >> 8;
+        int blue = colorInt & 0x0000FF;
+        return red + ", " + green + ", " + blue;
+      }
+      return value;
     }
 
     @Override
