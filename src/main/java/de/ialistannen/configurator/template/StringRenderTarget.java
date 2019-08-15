@@ -39,11 +39,33 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
     ast = new DslParser(new StringReader(source)).parse();
   }
 
+  /**
+   * A render target that renders a given String in the common DSL format.
+   *
+   * @param source the source string
+   * @param commandPrefix the command prefix
+   * @throws ParseException if the string contains errors
+   */
+  private StringRenderTarget(String source, String commandPrefix) throws ParseException {
+    ast = new DslParser(new StringReader(source), commandPrefix).parse();
+  }
+
   @Override
   public Pair<StringRenderedObject, RenderContext> render(RenderContext context) {
     RenderVisitor visitor = new RenderVisitor(context);
     StringRenderedObject result = new StringRenderedObject(ast.accept(visitor));
     return new Pair<>(result, visitor.getContext());
+  }
+
+  /**
+   * Creates a string render target that handles a single line.
+   *
+   * @param line the line
+   * @return the render target
+   * @throws ParseException if an error occurs
+   */
+  public static StringRenderTarget singleLine(String line) throws ParseException {
+    return new StringRenderTarget(line, "#");
   }
 
   /**

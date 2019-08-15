@@ -1,6 +1,7 @@
 package de.ialistannen.configurator.phases;
 
 import de.ialistannen.configurator.rendering.FileRenderTarget;
+import de.ialistannen.configurator.rendering.RenderTarget;
 import de.ialistannen.configurator.template.StringRenderTarget;
 import de.ialistannen.configurator.util.ParseException;
 import de.ialistannen.configurator.util.StringReader;
@@ -8,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -51,14 +51,14 @@ public class RenderTargetCollector {
       private void handleFile(Path file) throws IOException, ParseException {
         List<String> lines = Files.readAllLines(file);
         String phaseName = extractPhaseName(lines);
-        Path targetPath = Paths.get(extractTargetPath(lines));
+        RenderTarget<?> targetPathTarget = StringRenderTarget.singleLine(extractTargetPath(lines));
 
         String fileContents = lines.stream()
             .skip(2)
             .collect(Collectors.joining(System.lineSeparator()));
         FileRenderTarget renderTarget = new FileRenderTarget(
             new StringRenderTarget(fileContents),
-            targetPath
+            targetPathTarget
         );
 
         renderTargets.computeIfAbsent(phaseName, (key) -> new ArrayList<>())

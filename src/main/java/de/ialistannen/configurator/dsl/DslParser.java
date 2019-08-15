@@ -17,7 +17,7 @@ import lombok.AllArgsConstructor;
 /**
  * A parser for the configurator DSL.
  */
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class DslParser {
 
   private StringReader input;
