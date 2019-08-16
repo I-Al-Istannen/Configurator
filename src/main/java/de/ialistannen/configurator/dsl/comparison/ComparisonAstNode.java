@@ -21,6 +21,6 @@ public class ComparisonAstNode implements AstNode {
 
   @Override
   public <T> T accept(AstVisitor<T> visitor) {
-    return visitor.acceptComparisonAstNode(this);
+    return visitor.visitComparisonAstNode(this);
   }
 }

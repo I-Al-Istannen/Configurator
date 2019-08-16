@@ -71,7 +71,7 @@ public interface AstVisitor<T> {
    * @param node the comparison node
    * @return the return value this visitor chose
    */
-  T acceptComparisonAstNode(ComparisonAstNode node);
+  T visitComparisonAstNode(ComparisonAstNode node);
 
   /**
    * Called for each if node.
@@ -79,5 +79,13 @@ public interface AstVisitor<T> {
    * @param node the if node
    * @return the return value this visitor chose
    */
-  T acceptIfAstNode(IfAstNode node);
+  T visitIfAstNode(IfAstNode node);
+
+  /**
+   * Called for each action call node.
+   *
+   * @param node the action call node
+   * @return the return value this visitor chose
+   */
+  T visitActionCall(ActionCallAstNode node);
 }

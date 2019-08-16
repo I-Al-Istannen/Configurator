@@ -1,7 +1,9 @@
 package de.ialistannen.configurator.template;
 
+import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.context.RenderContext;
 import de.ialistannen.configurator.dsl.ActionAstNode;
+import de.ialistannen.configurator.dsl.ActionCallAstNode;
 import de.ialistannen.configurator.dsl.AssignmentAstNode;
 import de.ialistannen.configurator.dsl.AstNode;
 import de.ialistannen.configurator.dsl.AstVisitor;
@@ -19,6 +21,8 @@ import de.ialistannen.configurator.util.Pair;
 import de.ialistannen.configurator.util.ParseException;
 import de.ialistannen.configurator.util.ProcessUtils;
 import de.ialistannen.configurator.util.StringReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -136,20 +140,28 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
     }
 
     @Override
-    public String acceptComparisonAstNode(ComparisonAstNode node) {
+    public String visitComparisonAstNode(ComparisonAstNode node) {
       String left = node.getLeft().accept(this);
       String right = node.getRight().accept(this);
       return node.getComparisonFunction().apply(left, right).toString();
     }
 
     @Override
-    public String acceptIfAstNode(IfAstNode node) {
+    public String visitIfAstNode(IfAstNode node) {
       ComparisonAstNode condition = node.getCondition();
       String result = condition.accept(this);
       if (result.equals("true")) {
         return node.getContent().accept(this);
       }
       return "";
+    }
+
+    @Override
+    public String visitActionCall(ActionCallAstNode node) {
+      String name = new Action(node.getName(), "").getSanitizedName();
+      Path actionsDir = Paths.get(context.getValue("actions_dir"));
+      Path actionFile = actionsDir.resolve(name);
+      return actionFile.toAbsolutePath().toString() + " " + node.getArgumentString();
     }
   }
 }

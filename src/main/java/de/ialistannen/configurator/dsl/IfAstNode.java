@@ -14,6 +14,6 @@ public class IfAstNode implements AstNode {
 
   @Override
   public <T> T accept(AstVisitor<T> visitor) {
-    return visitor.acceptIfAstNode(this);
+    return visitor.visitIfAstNode(this);
   }
 }
