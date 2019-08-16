@@ -133,14 +133,14 @@ public class DslParser {
       case "if":
         return readIf();
       case "call":
-        return readCall();
+        input.assertRead("call");
+        return readCall(input);
       default:
         return readAssignment();
     }
   }
 
-  private AstNode readCall() throws ParseException {
-    input.assertRead("call");
+  private AstNode readCall(StringReader input) throws ParseException {
     input.readWhile(Character::isWhitespace);
     String actionName = input.readEnclosedByParentheses();
     input.readWhile(Character::isWhitespace);
@@ -274,6 +274,9 @@ public class DslParser {
         break;
       case '!':
         result = readShellCommand(input);
+        break;
+      case '|':
+        result = readCall(input);
         break;
       default:
         throw new ParseException(input, "Unknown command");
