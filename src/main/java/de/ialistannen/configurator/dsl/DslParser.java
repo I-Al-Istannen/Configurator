@@ -132,9 +132,19 @@ public class DslParser {
         return readScript();
       case "if":
         return readIf();
+      case "call":
+        return readCall();
       default:
         return readAssignment();
     }
+  }
+
+  private AstNode readCall() throws ParseException {
+    input.assertRead("call");
+    input.readWhile(Character::isWhitespace);
+    String actionName = input.readEnclosedByParentheses();
+    input.readWhile(Character::isWhitespace);
+    return new ActionCallAstNode(actionName, input.readEnclosedByParentheses());
   }
 
   private AstNode readIf() throws ParseException {

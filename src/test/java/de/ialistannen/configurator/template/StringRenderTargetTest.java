@@ -8,6 +8,7 @@ import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.context.PhaseContext;
 import de.ialistannen.configurator.context.RenderContext;
 import de.ialistannen.configurator.util.ParseException;
+import java.nio.file.Paths;
 import java.util.AbstractMap.SimpleEntry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -234,6 +235,29 @@ class StringRenderTargetTest {
         .extracting(RenderContext::getAllValues)
         .asInstanceOf(map(String.class, Object.class))
         .containsExactly(new SimpleEntry<>("a", "b"));
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllActions)
+        .asInstanceOf(list(Action.class))
+        .isEmpty();
+  }
+
+  @ParameterizedTest(name = "\"{0}\" should be \"{1}\"")
+  @CsvSource({
+      "(Test) (HeyHa), /Test HeyHa",
+      "(Test) (Hey Ha), /Test Hey Ha",
+      "(Test this) (Hey Ha), /Test_this Hey Ha",
+  })
+  public void callAction(String callSuffix, String expected) throws ParseException {
+    String input = getPrefix()
+        + "# actions_dir = actions\n"
+        + "# call " + callSuffix;
+    assertThat(getResult(new PhaseContext(), input))
+        .isEqualTo(Paths.get("actions").toAbsolutePath() + expected);
+
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllValues)
+        .asInstanceOf(map(String.class, Object.class))
+        .containsExactly(new SimpleEntry<>("actions_dir", "actions"));
     assertThat(getContext(new PhaseContext(), input))
         .extracting(RenderContext::getAllActions)
         .asInstanceOf(list(Action.class))

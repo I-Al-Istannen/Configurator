@@ -161,6 +161,21 @@ class DslParserTest {
     ));
   }
 
+  @ParameterizedTest(name = "\"{0}\" should parse to \"{1}\" with args \"{2}\"")
+  @CsvSource({
+      "'# call (Test) ()', Test, ",
+      "'# call (Test) (a)', Test, a",
+      "'# call (Test) (a b c)', Test, a b c",
+      "'# call (Test me) (a b c)', Test me, a b c",
+      "'# call (Test me) (''a b c'')', Test me, '''a b c'''",
+  })
+  public void parseCallAction(String text, String name, String argString) throws ParseException {
+    AstNode result = getParsedResult(text);
+    assertThat(result).isEqualTo(wrapInBlock(
+        new ActionCallAstNode(name, argString == null ? "" : argString)
+    ));
+  }
+
   private AstNode getParsedResult(String input) throws ParseException {
     return new DslParser(new StringReader("Command prefix: #\n" + input)).parse();
   }
