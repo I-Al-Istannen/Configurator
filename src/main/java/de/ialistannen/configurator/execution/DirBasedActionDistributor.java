@@ -137,7 +137,7 @@ public class DirBasedActionDistributor implements ActionDistributor {
     }
     result.append(") | rofi -sep '")
         .append(separator)
-        .append("' -dmenu -p '>' -matching fuzzy -i -no-custom)");
+        .append("' -dmenu -p '' -matching fuzzy -i -no-custom)");
     return result.toString();
   }
 
