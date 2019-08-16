@@ -118,7 +118,9 @@ public class DirBasedActionDistributor implements ActionDistributor {
     for (String name : names) {
       result.append("echo -n '").append(name).append(separator).append("' ").append("; ");
     }
-    result.append(") | rofi -sep '").append(separator).append("' -dmenu)");
+    result.append(") | rofi -sep '")
+        .append(separator)
+        .append("' -dmenu -p '>' -matching fuzzy -i)");
     return result.toString();
   }
 
