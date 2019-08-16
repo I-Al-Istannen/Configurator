@@ -239,7 +239,10 @@ public class DslParser {
 
   private AstNode readAction() throws ParseException {
     return readNamedEnclosed("action",
-        (name, content) -> new ActionAstNode(new Action(name, content))
+        (name, content) -> {
+          AstNode inner = new DslParser(new StringReader(content), commandPrefix).parse();
+          return new ActionAstNode(new Action(name, inner));
+        }
     );
   }
 

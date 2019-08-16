@@ -120,8 +120,13 @@ class DslParserTest {
     String input = "# action " + name + "\n"
         + content
         + "# end action";
+
+    AstNode expectedContent = wrapInBlock(
+        new LiteralAstNode(content.split("\\n")[0] + "\n"),
+        new LiteralAstNode(content.split("\\n")[1] + "\n")
+    );
     assertThat(getParsedResult(input)).isEqualTo(
-        wrapInBlock(new ActionAstNode(new Action(name, content)))
+        wrapInBlock(new ActionAstNode(new Action(name, expectedContent)))
     );
   }
 

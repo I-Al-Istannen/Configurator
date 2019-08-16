@@ -25,10 +25,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Renders a string to an ast.
  */
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
 
   private final AstNode ast;
@@ -70,6 +73,16 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
    */
   public static StringRenderTarget singleLine(String line) throws ParseException {
     return new StringRenderTarget(line, "#");
+  }
+
+  /**
+   * Renders the target ast.
+   *
+   * @param ast the ast
+   * @return the rendered output
+   */
+  public static StringRenderTarget fromAst(AstNode ast) {
+    return new StringRenderTarget(ast);
   }
 
   /**
@@ -158,7 +171,7 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
 
     @Override
     public String visitActionCall(ActionCallAstNode node) {
-      String name = new Action(node.getName(), "").getSanitizedName();
+      String name = new Action(node.getName(), new LiteralAstNode("")).getSanitizedName();
       Path actionsDir = Paths.get(context.<String>getValue("actions_dir"));
       Path actionFile = actionsDir.resolve(name);
       return actionFile.toAbsolutePath().toString() + " " + node.getArgumentString();

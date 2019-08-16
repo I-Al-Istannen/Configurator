@@ -7,9 +7,12 @@ import static org.assertj.core.api.InstanceOfAssertFactories.map;
 import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.context.PhaseContext;
 import de.ialistannen.configurator.context.RenderContext;
+import de.ialistannen.configurator.dsl.BlockAstNode;
+import de.ialistannen.configurator.dsl.LiteralAstNode;
 import de.ialistannen.configurator.util.ParseException;
 import java.nio.file.Paths;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -149,7 +152,9 @@ class StringRenderTargetTest {
     assertThat(getContext(new PhaseContext(), input))
         .extracting(RenderContext::getAllActions)
         .asInstanceOf(list(Action.class))
-        .containsExactly(new Action("Test me!", "am content 'ä'\n"));
+        .containsExactly(new Action("Test me!",
+            new BlockAstNode(Collections.singletonList(new LiteralAstNode("am content 'ä'\n")))
+        ));
   }
 
   @Test

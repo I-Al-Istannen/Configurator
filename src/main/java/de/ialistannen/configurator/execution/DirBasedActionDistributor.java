@@ -8,7 +8,12 @@ import static de.ialistannen.configurator.output.TerminalColor.MAGENTA;
 
 import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.context.RenderContext;
+import de.ialistannen.configurator.dsl.AstNode;
+import de.ialistannen.configurator.dsl.DslParser;
 import de.ialistannen.configurator.exception.DistributionException;
+import de.ialistannen.configurator.template.StringRenderTarget;
+import de.ialistannen.configurator.util.ParseException;
+import de.ialistannen.configurator.util.StringReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -63,8 +68,13 @@ public class DirBasedActionDistributor implements ActionDistributor {
 
     for (Action action : context.getAllActions()) {
       Path actionPath = resolveActionPath(baseDir, action);
+      String content = StringRenderTarget.fromAst(action.getContent())
+          .render(context)
+          .getFirst()
+          .asString();
+
       if (!dry) {
-        Files.write(actionPath, action.getContent().getBytes(StandardCharsets.UTF_8));
+        Files.write(actionPath, content.getBytes(StandardCharsets.UTF_8));
         makeExecutable(actionPath);
       } else {
         colorOut(
@@ -72,7 +82,7 @@ public class DirBasedActionDistributor implements ActionDistributor {
                 + MAGENTA + " to " + GREEN + actionPath.toAbsolutePath()
         );
         if (printFileContents) {
-          colorOut(GRAY + action.getContent());
+          colorOut(GRAY + content);
         }
       }
     }
@@ -89,7 +99,8 @@ public class DirBasedActionDistributor implements ActionDistributor {
     Files.setPosixFilePermissions(path, existingPerms);
   }
 
-  private RenderContext generateRunScript(RenderContext context, Path baseDir) {
+  private RenderContext generateRunScript(RenderContext context, Path baseDir)
+      throws DistributionException {
     StringBuilder runAction = new StringBuilder();
     runAction.append("#/bin/env bash").append(System.lineSeparator())
         .append("# vim: ft=sh").append(System.lineSeparator());
@@ -109,7 +120,13 @@ public class DirBasedActionDistributor implements ActionDistributor {
 
     runAction.append(buildRunScriptCase(allActions, baseDir));
 
-    return context.storeAction(new Action("Run action", runAction.toString()));
+    AstNode actionContent;
+    try {
+      actionContent = new DslParser(new StringReader(runAction.toString()), "#").parse();
+    } catch (ParseException e) {
+      throw new DistributionException("Could not create aggregate runner actionA", e);
+    }
+    return context.storeAction(new Action("Run action", actionContent));
   }
 
   private String buildRunScriptRofiInvocation(List<String> names) {
@@ -120,7 +137,7 @@ public class DirBasedActionDistributor implements ActionDistributor {
     }
     result.append(") | rofi -sep '")
         .append(separator)
-        .append("' -dmenu -p '>' -matching fuzzy -i)");
+        .append("' -dmenu -p '>' -matching fuzzy -i -no-custom)");
     return result.toString();
   }
 

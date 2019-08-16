@@ -1,5 +1,6 @@
 package de.ialistannen.configurator.context;
 
+import de.ialistannen.configurator.dsl.AstNode;
 import lombok.Data;
 
 /**
@@ -9,7 +10,7 @@ import lombok.Data;
 public class Action {
 
   private final String name;
-  private final String content;
+  private final AstNode content;
 
   /**
    * Returns a sanitized version of the name that can be used as a file name.
