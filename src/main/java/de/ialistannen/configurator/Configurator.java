@@ -2,10 +2,17 @@ package de.ialistannen.configurator;
 
 import static de.ialistannen.configurator.output.ColoredOutput.colorErr;
 import static de.ialistannen.configurator.output.ColoredOutput.colorOut;
-import static de.ialistannen.configurator.output.TerminalColor.GRAY;
+import static de.ialistannen.configurator.output.TerminalColor.BLUE;
+import static de.ialistannen.configurator.output.TerminalColor.BOLD;
+import static de.ialistannen.configurator.output.TerminalColor.BRIGHT_BLUE;
+import static de.ialistannen.configurator.output.TerminalColor.DIM;
+import static de.ialistannen.configurator.output.TerminalColor.GREEN;
+import static de.ialistannen.configurator.output.TerminalColor.MAGENTA;
 import static de.ialistannen.configurator.output.TerminalColor.RED;
+import static de.ialistannen.configurator.output.TerminalColor.UNDERLINE;
 
 import de.ialistannen.configurator.config.Config;
+import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.context.PhaseContext;
 import de.ialistannen.configurator.context.RenderContext;
 import de.ialistannen.configurator.exception.DistributionException;
@@ -27,6 +34,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -39,7 +48,8 @@ public class Configurator {
 
   private static final String DRY_RUN = "d";
   private static final String PRINT_CONTENTS = "f";
-  private static final String STRIP_COLOR = "c";
+  private static final String STRIP_COLOR = "n";
+  private static final String PRINT_CONTEXT = "c";
 
   public static void main(String[] args) throws IOException {
     CommandLineParser parser = new DefaultParser();
@@ -75,11 +85,18 @@ public class Configurator {
         new PhaseContext()
     );
 
-    colorOut(GRAY + "Final context is " + rendered.getSecond());
-
     try {
       boolean dry = cmd.hasOption(DRY_RUN);
       boolean printFileContents = cmd.hasOption(PRINT_CONTENTS);
+
+      if (dry) {
+        String dryHeader = " _____                     _   _               ____  _\n"
+            + "| ____|_  _____  ___ _   _| |_(_) ___  _ __   |  _ \\| | __ _ _ __\n"
+            + "|  _| \\ \\/ / _ \\/ __| | | | __| |/ _ \\| '_ \\  | |_) | |/ _` | '_ \\\n"
+            + "| |___ >  <  __/ (__| |_| | |_| | (_) | | | | |  __/| | (_| | | | |\n"
+            + "|_____/_/\\_\\___|\\___|\\__,_|\\__|_|\\___/|_| |_| |_|   |_|\\__,_|_| |_|\n";
+        printHeader(dryHeader);
+      }
 
       ActionDistributor actionDistributor = new DirBasedActionDistributor(dry, printFileContents);
       FileDistributor fileDistributor = new FileSystemFileDistributor(dry, printFileContents);
@@ -89,6 +106,44 @@ public class Configurator {
     } catch (DistributionException e) {
       e.printStackTrace();
     }
+
+    if (cmd.hasOption(PRINT_CONTEXT)) {
+      String contextHeader = "  ____            _            _\n"
+          + " / ___|___  _ __ | |_ _____  _| |_\n"
+          + "| |   / _ \\| '_ \\| __/ _ \\ \\/ / __|\n"
+          + "| |__| (_) | | | | ||  __/>  <| |_\n"
+          + " \\____\\___/|_| |_|\\__\\___/_/\\_\\\\__|\n";
+      printHeader(contextHeader);
+      colorOut(BLUE.toString() + BOLD + UNDERLINE + "Values:");
+      String values = rendered.getSecond().getAllValues().entrySet()
+          .stream()
+          .sorted(Entry.comparingByKey())
+          .map(entry -> MAGENTA + entry.getKey() + "=" + GREEN + entry.getValue())
+          .collect(Collectors.joining(", "));
+      colorOut(values);
+      colorOut(DIM.toString() + UNDERLINE + repeat(" ", 40));
+      colorOut(BRIGHT_BLUE.toString() + BOLD + UNDERLINE + "Actions:");
+      String actionNames = rendered.getSecond()
+          .getAllActions()
+          .stream()
+          .map(Action::getName)
+          .sorted()
+          .collect(Collectors.joining(", "));
+      colorOut(MAGENTA + actionNames);
+    }
+  }
+
+  private static void printHeader(String header) {
+    colorOut(RED.toString() + BOLD + "\n" + header + "\n");
+  }
+
+  private static String repeat(String string, int amount) {
+    StringBuilder result = new StringBuilder();
+
+    for (int i = 0; i < amount; i++) {
+      result.append(string);
+    }
+    return result.toString();
   }
 
   private static Options getOptions() {
@@ -114,6 +169,16 @@ public class Configurator {
         .longOpt("strip-color")
         .hasArg(false)
         .desc("If present the program will not color its output.")
+        .type(Boolean.class)
+        .build()
+    );
+    options.addOption(Option.builder(PRINT_CONTEXT)
+        .argName("Prints the context")
+        .longOpt("print-context")
+        .hasArg(false)
+        .desc(
+            "If present the program will print the final context after all rendering steps were completed."
+        )
         .type(Boolean.class)
         .build()
     );
