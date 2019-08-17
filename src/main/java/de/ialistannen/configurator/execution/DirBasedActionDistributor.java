@@ -16,9 +16,12 @@ import de.ialistannen.configurator.util.ParseException;
 import de.ialistannen.configurator.util.StringReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -37,6 +40,7 @@ public class DirBasedActionDistributor implements ActionDistributor {
 
   private final boolean dry;
   private final boolean printFileContents;
+  private final boolean preserveActionsDir;
 
   @Override
   public void distributeActions(RenderContext context) throws DistributionException {
@@ -47,10 +51,38 @@ public class DirBasedActionDistributor implements ActionDistributor {
         .orElseThrow(() -> new RuntimeException("Could not find '$" + BASE_DIR_KEY));
     Path baseDir = Paths.get(dir);
     try {
+      if (!preserveActionsDir) {
+        deleteDirectory(baseDir);
+      }
       distribute(generateRunScript(context, baseDir), baseDir);
     } catch (IOException e) {
       throw new DistributionException("Error distributing actions", e);
     }
+  }
+
+  private void deleteDirectory(Path baseDir) throws IOException {
+    colorOut(BRIGHT_MAGENTA + "Deleting actions dir");
+    Files.walkFileTree(baseDir, new SimpleFileVisitor<Path>() {
+      @Override
+      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+        if (!dry) {
+          Files.delete(file);
+        } else {
+          colorOut(BRIGHT_MAGENTA + "Deleting file " + GREEN + file.toAbsolutePath());
+        }
+        return FileVisitResult.CONTINUE;
+      }
+
+      @Override
+      public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+        if (!dry) {
+          Files.delete(dir);
+        } else {
+          colorOut(BRIGHT_MAGENTA + "Deleting dir " + GREEN + dir.toAbsolutePath());
+        }
+        return FileVisitResult.CONTINUE;
+      }
+    });
   }
 
   private void distribute(RenderContext context, Path baseDir) throws IOException {

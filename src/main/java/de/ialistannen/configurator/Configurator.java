@@ -50,6 +50,7 @@ public class Configurator {
   private static final String PRINT_CONTENTS = "f";
   private static final String STRIP_COLOR = "n";
   private static final String PRINT_CONTEXT = "c";
+  private static final String PRESERVE_ACTIONS_DIR = "p";
 
   public static void main(String[] args) throws IOException {
     CommandLineParser parser = new DefaultParser();
@@ -88,6 +89,7 @@ public class Configurator {
     try {
       boolean dry = cmd.hasOption(DRY_RUN);
       boolean printFileContents = cmd.hasOption(PRINT_CONTENTS);
+      boolean preserveActionsDir = cmd.hasOption(PRESERVE_ACTIONS_DIR);
 
       if (dry) {
         String dryHeader = " _____                     _   _               ____  _\n"
@@ -98,7 +100,11 @@ public class Configurator {
         printHeader(dryHeader);
       }
 
-      ActionDistributor actionDistributor = new DirBasedActionDistributor(dry, printFileContents);
+      ActionDistributor actionDistributor = new DirBasedActionDistributor(
+          dry,
+          printFileContents,
+          preserveActionsDir
+      );
       FileDistributor fileDistributor = new FileSystemFileDistributor(dry, printFileContents);
 
       fileDistributor.distributeFiles(rendered.getFirst());
@@ -178,6 +184,16 @@ public class Configurator {
         .hasArg(false)
         .desc(
             "If present the program will print the final context after all rendering steps were completed."
+        )
+        .type(Boolean.class)
+        .build()
+    );
+    options.addOption(Option.builder(PRESERVE_ACTIONS_DIR)
+        .argName("Does not clear the actions dir of any existing actions.")
+        .longOpt("preserve-actions-dir")
+        .hasArg(false)
+        .desc(
+            "If present the program will not delete the action dir to preserve existing actions"
         )
         .type(Boolean.class)
         .build()
