@@ -18,6 +18,6 @@ public class Action {
    * @return the sanitized name
    */
   public String getSanitizedName() {
-    return name.replaceAll("\\s", "_");
+    return name.replaceAll("\\s", "_").replace(":", "_");
   }
 }

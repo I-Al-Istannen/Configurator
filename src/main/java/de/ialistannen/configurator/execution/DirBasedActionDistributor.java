@@ -152,7 +152,8 @@ public class DirBasedActionDistributor implements ActionDistributor {
       result.append("        '")
           .append(action.getName())
           .append("')").append(System.lineSeparator())
-          .append("            ").append(resolveActionPath(baseDir, action))
+          .append("            (sleep 0.2 && ").append(resolveActionPath(baseDir, action))
+          .append(") &")
           .append(System.lineSeparator())
           .append("            ;;").append(System.lineSeparator());
     }
