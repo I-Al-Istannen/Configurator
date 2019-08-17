@@ -81,11 +81,9 @@ public class DslParser {
    * @return the parse result
    */
   private AstNode parseSection(boolean withNewline) throws ParseException {
-    if (input.peek(commandPrefix.length()).equals(commandPrefix)) {
-      Optional<AstNode> command = tryParse(this::parseCommand, input);
-      if (command.isPresent()) {
-        return command.get();
-      }
+    Optional<AstNode> command = tryParseCommand();
+    if (command.isPresent()) {
+      return command.get();
     }
 
     String line;
@@ -118,6 +116,23 @@ public class DslParser {
     }
 
     return new BlockAstNode(children);
+  }
+
+  private Optional<AstNode> tryParseCommand() {
+    int start = input.getPosition();
+    String whitespace = input.readWhile(it -> it == ' ' || it == '\t');
+
+    if (input.peek(commandPrefix.length()).equals(commandPrefix)) {
+      return tryParse(this::parseCommand, input).map(it -> {
+        if (whitespace.isEmpty()) {
+          return it;
+        }
+        return new BlockAstNode(Arrays.asList(new LiteralAstNode(whitespace), it));
+      });
+    } else {
+      input.reset(start);
+    }
+    return Optional.empty();
   }
 
   private AstNode parseCommand() throws ParseException {

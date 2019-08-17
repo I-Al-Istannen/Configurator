@@ -153,6 +153,19 @@ class DslParserTest {
   }
 
   @Test
+  public void handleCommandWithTrailingSpaces() throws ParseException {
+    String spaces = "    ";
+    String input = spaces + "# user = test";
+
+    AstNode result = getParsedResult(input);
+
+    assertThat(result).isEqualTo(wrapInBlock(wrapInBlock(
+        new LiteralAstNode(spaces),
+        new AssignmentAstNode("user", new LiteralAstNode("test"))
+    )));
+  }
+
+  @Test
   public void parseIf() throws ParseException {
     String input = "# if (hey) == (you)\n"
         + "hey\n"
