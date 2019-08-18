@@ -59,7 +59,7 @@ public class JavaScriptScript implements Script {
     @Override
     public <T> RenderContext storeValue(String key, T val) {
       underlying = underlying.storeValue(key, val);
-      return underlying;
+      return this;
     }
 
     @Override
@@ -71,7 +71,7 @@ public class JavaScriptScript implements Script {
     @Override
     public RenderContext storeAction(Action action) {
       underlying = underlying.storeAction(action);
-      return underlying;
+      return this;
     }
 
     @Override
@@ -92,6 +92,17 @@ public class JavaScriptScript implements Script {
     @Override
     public RenderContext merge(RenderContext other) {
       return underlying.merge(other);
+    }
+
+    @Override
+    public RenderContext addPostScript(String content) {
+      underlying = underlying.addPostScript(content);
+      return this;
+    }
+
+    @Override
+    public List<String> getAllPostScripts() {
+      return underlying.getAllPostScripts();
     }
   }
 }

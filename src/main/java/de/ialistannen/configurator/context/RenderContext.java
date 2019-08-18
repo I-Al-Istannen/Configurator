@@ -82,4 +82,19 @@ public interface RenderContext {
    * @return the merged context
    */
   RenderContext merge(RenderContext other);
+
+  /**
+   * Adds a new script to be run at the end.
+   *
+   * @param content the content
+   * @return the render context
+   */
+  RenderContext addPostScript(String content);
+
+  /**
+   * Returns all scripts that will be run at the end.
+   *
+   * @return all scripts to run at the end
+   */
+  List<String> getAllPostScripts();
 }

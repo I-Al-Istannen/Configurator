@@ -271,14 +271,15 @@ class StringRenderTargetTest {
 
   @Test
   public void executeMultipleBash() throws ParseException {
-    String input = getPrefix() + "# execute\n"
-        + "#!/usr/bin/env bash\n"
+    String script = "#!/usr/bin/env bash\n"
         + "echo 'My friend'\n"
-        + "echo 'Hello world!'\n"
+        + "echo 'Hello world!'\n";
+    String input = getPrefix() + "# execute\n"
+        + script
         + "# end execute";
 
     assertThat(getResult(new PhaseContext(), input))
-        .isEqualTo("My friend\nHello world!");
+        .isEqualTo("");
 
     assertThat(getContext(new PhaseContext(), input))
         .extracting(RenderContext::getAllValues)
@@ -288,18 +289,23 @@ class StringRenderTargetTest {
         .extracting(RenderContext::getAllActions)
         .asInstanceOf(list(Action.class))
         .isEmpty();
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllPostScripts)
+        .asInstanceOf(list(String.class))
+        .containsExactly(script);
   }
 
   @Test
   public void executeMultiplePython() throws ParseException {
-    String input = getPrefix() + "# execute\n"
-        + "#!/usr/bin/env python3\n"
+    String script = "#!/usr/bin/env python3\n"
         + "print(\"My friend\")\n"
-        + "print(\"Hello world!\")\n"
+        + "print(\"Hello world!\")\n";
+    String input = getPrefix() + "# execute\n"
+        + script
         + "# end execute";
 
     assertThat(getResult(new PhaseContext(), input))
-        .isEqualTo("My friend\nHello world!");
+        .isEqualTo("");
 
     assertThat(getContext(new PhaseContext(), input))
         .extracting(RenderContext::getAllValues)
@@ -309,6 +315,10 @@ class StringRenderTargetTest {
         .extracting(RenderContext::getAllActions)
         .asInstanceOf(list(Action.class))
         .isEmpty();
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllPostScripts)
+        .asInstanceOf(list(String.class))
+        .containsExactly(script);
   }
 
   private String getResult(RenderContext context, String input) throws ParseException {

@@ -20,6 +20,7 @@ import de.ialistannen.configurator.execution.ActionDistributor;
 import de.ialistannen.configurator.execution.DirBasedActionDistributor;
 import de.ialistannen.configurator.execution.FileDistributor;
 import de.ialistannen.configurator.execution.FileSystemFileDistributor;
+import de.ialistannen.configurator.execution.PostActionRunner;
 import de.ialistannen.configurator.execution.Reactor;
 import de.ialistannen.configurator.output.ColoredOutput;
 import de.ialistannen.configurator.phases.MultiTargetRenderer;
@@ -109,6 +110,18 @@ public class Configurator {
 
       fileDistributor.distributeFiles(rendered.getFirst());
       actionDistributor.distributeActions(rendered.getSecond());
+
+      if (dry) {
+        String actionsHeader = " ____           _     ____            _       _\n"
+            + "|  _ \\ ___  ___| |_  / ___|  ___ _ __(_)_ __ | |_ ___\n"
+            + "| |_) / _ \\/ __| __| \\___ \\ / __| '__| | '_ \\| __/ __|\n"
+            + "|  __/ (_) \\__ \\ |_   ___) | (__| |  | | |_) | |_\\__ \\\n"
+            + "|_|   \\___/|___/\\__| |____/ \\___|_|  |_| .__/ \\__|___/\n"
+            + "                                       |_|\n";
+        printHeader(actionsHeader);
+      }
+
+      new PostActionRunner(dry, printFileContents).run(rendered.getSecond());
     } catch (DistributionException e) {
       e.printStackTrace();
     }
@@ -136,6 +149,16 @@ public class Configurator {
           .sorted()
           .collect(Collectors.joining(", "));
       colorOut(MAGENTA + actionNames);
+      colorOut(DIM.toString() + UNDERLINE + repeat(" ", 40));
+      colorOut(BRIGHT_BLUE.toString() + BOLD + UNDERLINE + "Post scripts:");
+      String postScriptStarts = rendered.getSecond()
+          .getAllPostScripts()
+          .stream()
+          .map(it -> it.replaceFirst("#.+", ""))
+          .map(it -> it.substring(0, Math.min(it.length(), 10)).trim())
+          .sorted()
+          .collect(Collectors.joining(", "));
+      colorOut(MAGENTA + postScriptStarts);
     }
   }
 

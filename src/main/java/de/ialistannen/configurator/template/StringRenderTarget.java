@@ -181,7 +181,8 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
     @Override
     public String visitExecuteFile(ExecuteFileAstNode node) {
       String file = node.getContent().accept(this);
-      return ProcessUtils.runAsFileWithShell(file);
+      context = context.addPostScript(file);
+      return "";
     }
   }
 }

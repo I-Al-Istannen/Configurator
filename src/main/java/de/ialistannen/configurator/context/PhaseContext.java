@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.pcollections.ConsPStack;
 import org.pcollections.HashPMap;
 import org.pcollections.HashTreePMap;
 
@@ -23,9 +24,10 @@ public class PhaseContext implements RenderContext {
 
   private HashPMap<String, Object> values;
   private HashPMap<String, Action> actions;
+  private ConsPStack<String> postActions;
 
   public PhaseContext() {
-    this(HashTreePMap.empty(), HashTreePMap.empty());
+    this(HashTreePMap.empty(), HashTreePMap.empty(), ConsPStack.empty());
   }
 
   @Override
@@ -42,7 +44,7 @@ public class PhaseContext implements RenderContext {
 
   @Override
   public <T> PhaseContext storeValue(String key, T val) {
-    return new PhaseContext(values.plus(key, val), actions);
+    return new PhaseContext(values.plus(key, val), actions, postActions);
   }
 
   @Override
@@ -52,7 +54,7 @@ public class PhaseContext implements RenderContext {
 
   @Override
   public RenderContext storeAction(Action action) {
-    return new PhaseContext(values, actions.plus(action.getName(), action));
+    return new PhaseContext(values, actions.plus(action.getName(), action), postActions);
   }
 
   @Override
@@ -86,5 +88,15 @@ public class PhaseContext implements RenderContext {
     }
 
     return result;
+  }
+
+  @Override
+  public RenderContext addPostScript(String content) {
+    return new PhaseContext(values, actions, postActions.plus(content));
+  }
+
+  @Override
+  public List<String> getAllPostScripts() {
+    return postActions;
   }
 }
