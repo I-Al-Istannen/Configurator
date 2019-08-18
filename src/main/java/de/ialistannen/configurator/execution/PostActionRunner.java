@@ -4,6 +4,7 @@ import static de.ialistannen.configurator.output.ColoredOutput.colorOut;
 import static de.ialistannen.configurator.output.TerminalColor.BRIGHT_MAGENTA;
 import static de.ialistannen.configurator.output.TerminalColor.DIM;
 import static de.ialistannen.configurator.output.TerminalColor.GRAY;
+import static de.ialistannen.configurator.output.TerminalColor.GREEN;
 
 import de.ialistannen.configurator.context.RenderContext;
 import de.ialistannen.configurator.util.ProcessUtils;
@@ -28,6 +29,7 @@ public class PostActionRunner {
   public void run(RenderContext context) {
     for (String script : context.getAllPostScripts()) {
       if (!dry) {
+        colorOut(BRIGHT_MAGENTA + "Running " + GREEN + abbreviate(script));
         ProcessUtils.runAsFileWithShell(script);
       } else {
         colorOut(BRIGHT_MAGENTA + "Would run " + DIM + GRAY + abbreviateIfNeeded(script));
@@ -39,6 +41,10 @@ public class PostActionRunner {
     if (printFullScripts) {
       return whole;
     }
+    return abbreviate(whole);
+  }
+
+  private String abbreviate(String whole) {
     return whole.substring(0, Math.min(whole.length(), ABBREVIATE_LENGTH))
         .replaceAll("\\n", " ⏎ ");
   }
