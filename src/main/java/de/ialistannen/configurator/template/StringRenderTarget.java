@@ -182,7 +182,7 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
     public String visitExecuteFile(ExecuteFileAstNode node) {
       String file = node.getContent().accept(this);
       context = context.addPostScript(file);
-      return "";
+      return file;
     }
   }
 }

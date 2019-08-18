@@ -279,7 +279,7 @@ class StringRenderTargetTest {
         + "# end execute";
 
     assertThat(getResult(new PhaseContext(), input))
-        .isEqualTo("");
+        .isEqualTo(script);
 
     assertThat(getContext(new PhaseContext(), input))
         .extracting(RenderContext::getAllValues)
@@ -305,7 +305,7 @@ class StringRenderTargetTest {
         + "# end execute";
 
     assertThat(getResult(new PhaseContext(), input))
-        .isEqualTo("");
+        .isEqualTo(script);
 
     assertThat(getContext(new PhaseContext(), input))
         .extracting(RenderContext::getAllValues)
