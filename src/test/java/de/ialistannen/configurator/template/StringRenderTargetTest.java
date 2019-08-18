@@ -269,6 +269,48 @@ class StringRenderTargetTest {
         .isEmpty();
   }
 
+  @Test
+  public void executeMultipleBash() throws ParseException {
+    String input = getPrefix() + "# execute\n"
+        + "#!/usr/bin/env bash\n"
+        + "echo 'My friend'\n"
+        + "echo 'Hello world!'\n"
+        + "# end execute";
+
+    assertThat(getResult(new PhaseContext(), input))
+        .isEqualTo("My friend\nHello world!");
+
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllValues)
+        .asInstanceOf(map(String.class, Object.class))
+        .isEmpty();
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllActions)
+        .asInstanceOf(list(Action.class))
+        .isEmpty();
+  }
+
+  @Test
+  public void executeMultiplePython() throws ParseException {
+    String input = getPrefix() + "# execute\n"
+        + "#!/usr/bin/env python3\n"
+        + "print(\"My friend\")\n"
+        + "print(\"Hello world!\")\n"
+        + "# end execute";
+
+    assertThat(getResult(new PhaseContext(), input))
+        .isEqualTo("My friend\nHello world!");
+
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllValues)
+        .asInstanceOf(map(String.class, Object.class))
+        .isEmpty();
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllActions)
+        .asInstanceOf(list(Action.class))
+        .isEmpty();
+  }
+
   private String getResult(RenderContext context, String input) throws ParseException {
     return new StringRenderTarget(input).render(context).getFirst().asString();
   }

@@ -150,9 +150,21 @@ public class DslParser {
       case "call":
         input.assertRead("call");
         return readCall(input);
+      case "execute":
+        return readExecute();
       default:
         return readAssignment();
     }
+  }
+
+  private AstNode readExecute() throws ParseException {
+    return readNamedEnclosed(
+        "execute",
+        (ignored, content) -> {
+          AstNode script = new DslParser(new StringReader(content), commandPrefix).parse();
+          return new ExecuteFileAstNode(script);
+        }
+    );
   }
 
   private AstNode readCall(StringReader input) throws ParseException {
@@ -238,7 +250,7 @@ public class DslParser {
   private AstNode readNamedEnclosed(String start, NamedSectionParser creator)
       throws ParseException {
     input.assertRead(start);
-    input.readWhile(Character::isWhitespace);
+    input.readWhile(it -> it == ' ' || it == '\t');
     final String END_MARKER = commandPrefix + " end " + start;
 
     String name = input.readLine();

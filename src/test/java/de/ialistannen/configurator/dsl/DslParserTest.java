@@ -194,6 +194,25 @@ class DslParserTest {
     ));
   }
 
+  @Test
+  public void parseExecute() throws ParseException {
+    String contentLineTwo = "echo 'My friend'\n";
+    String contentLineOne = "echo 'Hello world!'\n";
+    String content = contentLineOne + contentLineTwo;
+
+    String input = "# execute\n"
+        + "#!/usr/bin/env bash\n"
+        + content
+        + "# end execute";
+    assertThat(getParsedResult(input)).isEqualTo(wrapInBlock(
+        new ExecuteFileAstNode(wrapInBlock(
+            new LiteralAstNode("#!/usr/bin/env bash\n"),
+            new LiteralAstNode(contentLineOne),
+            new LiteralAstNode(contentLineTwo)
+        ))
+    ));
+  }
+
   private AstNode getParsedResult(String input) throws ParseException {
     return new DslParser(new StringReader("Command prefix: #\n" + input)).parse();
   }

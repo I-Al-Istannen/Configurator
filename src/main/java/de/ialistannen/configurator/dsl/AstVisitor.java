@@ -88,4 +88,12 @@ public interface AstVisitor<T> {
    * @return the return value this visitor chose
    */
   T visitActionCall(ActionCallAstNode node);
+
+  /**
+   * Called for each execute file node.
+   *
+   * @param node the execute file node
+   * @return the return value this visitor chose
+   */
+  T visitExecuteFile(ExecuteFileAstNode node);
 }

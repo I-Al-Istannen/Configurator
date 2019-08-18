@@ -8,16 +8,7 @@ import lombok.Data;
 @Data
 public class ShellCommandAstNode implements AstNode {
 
-  private String command;
-
-  /**
-   * Creates a new shell command node.
-   *
-   * @param command the command to run
-   */
-  public ShellCommandAstNode(String command) {
-    this.command = command;
-  }
+  private final String command;
 
   @Override
   public <T> T accept(AstVisitor<T> visitor) {

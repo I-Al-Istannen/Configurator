@@ -9,6 +9,7 @@ import de.ialistannen.configurator.dsl.AstNode;
 import de.ialistannen.configurator.dsl.AstVisitor;
 import de.ialistannen.configurator.dsl.BlockAstNode;
 import de.ialistannen.configurator.dsl.DslParser;
+import de.ialistannen.configurator.dsl.ExecuteFileAstNode;
 import de.ialistannen.configurator.dsl.IfAstNode;
 import de.ialistannen.configurator.dsl.LiteralAstNode;
 import de.ialistannen.configurator.dsl.ScriptAstNode;
@@ -175,6 +176,12 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
       Path actionsDir = Paths.get(context.<String>getValue("actions_dir"));
       Path actionFile = actionsDir.resolve(name);
       return actionFile.toAbsolutePath().toString() + " " + node.getArgumentString();
+    }
+
+    @Override
+    public String visitExecuteFile(ExecuteFileAstNode node) {
+      String file = node.getContent().accept(this);
+      return ProcessUtils.runAsFileWithShell(file);
     }
   }
 }
