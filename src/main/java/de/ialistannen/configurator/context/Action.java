@@ -11,6 +11,7 @@ public class Action {
 
   private final String name;
   private final AstNode content;
+  private final boolean hideFromRunAll;
 
   /**
    * Returns a sanitized version of the name that can be used as a file name.

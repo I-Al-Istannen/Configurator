@@ -153,7 +153,30 @@ class StringRenderTargetTest {
         .extracting(RenderContext::getAllActions)
         .asInstanceOf(list(Action.class))
         .containsExactly(new Action("Test me!",
-            new BlockAstNode(Collections.singletonList(new LiteralAstNode("am content 'ä'\n")))
+            new BlockAstNode(Collections.singletonList(new LiteralAstNode("am content 'ä'\n"))),
+            false
+        ));
+  }
+
+  @Test
+  public void hiddenActionAdded() throws ParseException {
+    String input = getPrefix()
+        + "# action* Test me!\n"
+        + "am content 'ä'\n"
+        + "# end action*";
+    assertThat(getResult(new PhaseContext(), input))
+        .isEqualTo("");
+
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllValues)
+        .asInstanceOf(map(String.class, Object.class))
+        .isEmpty();
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllActions)
+        .asInstanceOf(list(Action.class))
+        .containsExactly(new Action("Test me!",
+            new BlockAstNode(Collections.singletonList(new LiteralAstNode("am content 'ä'\n"))),
+            true
         ));
   }
 

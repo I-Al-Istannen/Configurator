@@ -126,7 +126,25 @@ class DslParserTest {
         new LiteralAstNode(content.split("\\n")[1] + "\n")
     );
     assertThat(getParsedResult(input)).isEqualTo(
-        wrapInBlock(new ActionAstNode(new Action(name, expectedContent)))
+        wrapInBlock(new ActionAstNode(new Action(name, expectedContent, false)))
+    );
+  }
+
+  @Test
+  public void parseHiddenAction() throws ParseException {
+    String name = "This is mine!";
+    String content = "hello world\n"
+        + "'hey'\n";
+    String input = "# action* " + name + "\n"
+        + content
+        + "# end action*";
+
+    AstNode expectedContent = wrapInBlock(
+        new LiteralAstNode(content.split("\\n")[0] + "\n"),
+        new LiteralAstNode(content.split("\\n")[1] + "\n")
+    );
+    assertThat(getParsedResult(input)).isEqualTo(
+        wrapInBlock(new ActionAstNode(new Action(name, expectedContent, true)))
     );
   }
 

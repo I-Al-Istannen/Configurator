@@ -139,6 +139,7 @@ public class DirBasedActionDistributor implements ActionDistributor {
 
     List<Action> allActions = context.getAllActions()
         .stream()
+        .filter(it -> !it.isHideFromRunAll())
         .sorted(Comparator.comparing(Action::getName))
         .collect(Collectors.toList());
 
@@ -158,7 +159,7 @@ public class DirBasedActionDistributor implements ActionDistributor {
     } catch (ParseException e) {
       throw new DistributionException("Could not create aggregate runner actionA", e);
     }
-    return context.storeAction(new Action("Run action", actionContent));
+    return context.storeAction(new Action("Run action", actionContent, true));
   }
 
   private String buildRunScriptRofiInvocation(List<String> names) {

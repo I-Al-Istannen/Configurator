@@ -142,7 +142,9 @@ public class DslParser {
     String firstWord = input.peekWhile(it -> !Character.isWhitespace(it));
     switch (firstWord) {
       case "action":
-        return readAction();
+        return readAction("action", false);
+      case "action*":
+        return readAction("action*", true);
       case "script":
         return readScript();
       case "if":
@@ -264,11 +266,11 @@ public class DslParser {
     return creator.create(name, content);
   }
 
-  private AstNode readAction() throws ParseException {
-    return readNamedEnclosed("action",
+  private AstNode readAction(String keyword, boolean hideFromRunAll) throws ParseException {
+    return readNamedEnclosed(keyword,
         (name, content) -> {
           AstNode inner = new DslParser(new StringReader(content), commandPrefix).parse();
-          return new ActionAstNode(new Action(name, inner));
+          return new ActionAstNode(new Action(name, inner, hideFromRunAll));
         }
     );
   }

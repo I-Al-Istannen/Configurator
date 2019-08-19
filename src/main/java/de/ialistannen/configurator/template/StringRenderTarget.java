@@ -172,7 +172,7 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
 
     @Override
     public String visitActionCall(ActionCallAstNode node) {
-      String name = new Action(node.getName(), new LiteralAstNode("")).getSanitizedName();
+      String name = new Action(node.getName(), new LiteralAstNode(""), false).getSanitizedName();
       Path actionsDir = Paths.get(context.<String>getValue("actions_dir"));
       Path actionFile = actionsDir.resolve(name);
       return actionFile.toAbsolutePath().toString() + " " + node.getArgumentString();
