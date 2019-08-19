@@ -115,6 +115,8 @@ echo "Hello world"
 # end action
 ```
 
+If you define an action using `action*` and `end action*`, the action *will not be listed in Run Action dialog*. This can be nice for auxiliary actions.
+
 ## Calling an action
 ```bash
 <command prefix> (<Action name>) (<arguments>)
