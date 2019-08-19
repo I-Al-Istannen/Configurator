@@ -11,7 +11,8 @@ Additionally a few example dotfiles are provided at the end to showcase various 
 3. [Features](#features)
    * [Config DSL](#config-dsl)
    * [Phases](#phases)
-4. [Config file format](#config-file-format)
+4. [Installation](#installation)
+5. [Config file format](#config-file-format)
    * [General layout](#general-layout)
    * [Variable assignment](#variable-assignment)
    * [Variable expansion](#variable-expansion)
@@ -24,13 +25,13 @@ Additionally a few example dotfiles are provided at the end to showcase various 
    * [Post scripts](#post-scripts)
    * [Scripts](#scripts)
    * [Main Configurator config file (`.configurator`)](#main-configurator-config-file---configurator--)
-5. [Example directory layout](#example-directory-layout)
-6. [Command line usage](#command-line-usage)
-7. [Screenshots](#screenshots)
+6. [Example directory layout](#example-directory-layout)
+7. [Command line usage](#command-line-usage)
+8. [Screenshots](#screenshots)
    + [Sample execution result](#sample-execution-result)
    + [Dry run start](#dry-run-start)
    + [Run Action](#run-action)
-8. [Sample files](#sample-files)
+9. [Sample files](#sample-files)
    + [`default_vars.conf`](#-default-varsconf-)
    + [`actions/brightness.conf`](#-actions-brightnessconf-)
    + [`themes/selected_theme.conf`](#-themes-selected-themeconf-)
@@ -52,8 +53,15 @@ Additionally a few example dotfiles are provided at the end to showcase various 
 
 ## Phases
 
-Each config file is assigned to a *phase*. These phases are then executed in the order specified in the `.configurator` config file. This allows you to have different steps in the exection, e.g. saving the selected theme in a variable and then only loading the theme matching that name or relying on variables that were added before.
+Each config file is assigned to a *phase*. These phases are then executed in the order specified in the `.configurator` config file. This allows you to have different steps in the execution, e.g. saving the selected theme in a variable and then only loading the theme matching that name or relying on variables that were added before.
 You can also use this to rely on the results of earlier config files.
+
+# Installation
+1. Run `mvn clean package` while in the root directory of the project.
+2. Optionally run `./generate_native.sh` to generate native images. Those will also be placed in `./target`
+4. Create a `.configurator` file in your configuration directory (see [Example directory layout](#example-directory-layout) for the basic layout)
+5. Create your config files (see the [General layout](#general-layout))
+6. Run the artifacts in `./target`, either via `java -jar` for the jars and `./<name>` for the native images. The native images start up a lot faster and use less memory.
 
 # Config file format
 
