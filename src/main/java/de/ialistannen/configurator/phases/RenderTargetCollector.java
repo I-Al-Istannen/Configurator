@@ -43,7 +43,7 @@ public class RenderTargetCollector {
         try {
           handleFile(file);
         } catch (ParseException e) {
-          throw new IOException("Error parsing file", e);
+          throw new IOException("Error parsing file '" + file + "'", e);
         }
         return FileVisitResult.CONTINUE;
       }

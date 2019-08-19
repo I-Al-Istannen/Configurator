@@ -66,4 +66,18 @@ public class RingBuffer<E> extends AbstractQueue<E> {
   public int hashCode() {
     return Objects.hash(capacity, underlying);
   }
+
+  /**
+   * Creates a buffer wrapping the given char array.
+   *
+   * @param chars the char array
+   * @return the resulting buffer
+   */
+  public static RingBuffer<Character> forCharArray(char... chars) {
+    RingBuffer<Character> buffer = new RingBuffer<>(chars.length);
+    for (char c : chars) {
+      buffer.add(c);
+    }
+    return buffer;
+  }
 }

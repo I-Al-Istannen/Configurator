@@ -283,38 +283,6 @@ public class StringReader {
   }
 
   /**
-   * A parser that reads everything between the marker
-   *
-   * @param startMarker the marker that must appear at the start and end
-   * @return a parser that reads everything between the marker
-   */
-  public String readEnclosedBy(char startMarker, char endMarker) throws ParseException {
-    assertRead("" + startMarker);
-    StringBuilder readString = new StringBuilder();
-
-    boolean escaped = false;
-    while (canRead()) {
-      char read = readChar();
-
-      if (escaped) {
-        escaped = false;
-        readString.append(read);
-        continue;
-      }
-
-      if (read == '\\') {
-        escaped = true;
-      } else if (read == endMarker) {
-        return readString.toString();
-      } else {
-        readString.append(read);
-      }
-    }
-    throw new ParseException(this, "Did not get closing " + endMarker);
-  }
-
-
-  /**
    * Reads the next characters and asserts that they equal the passed string.
    *
    * <p>Will not advance the cursor if it could not read the whole input.</p>
@@ -385,11 +353,38 @@ public class StringReader {
   }
 
   /**
-   * Returns a copy of this reader which is at the same position.
+   * Returns the current line number, starting with 1.
    *
-   * @return a copy of this reader   *
+   * @return the line number
    */
-  public StringReader copy() {
-    return new StringReader(underlying, position);
+  public int getLineNumber() {
+    return countOccurrences(System.lineSeparator()) + 1;
+  }
+
+  /**
+   * Returns the amount of times a sequence occurred in the read string.
+   *
+   * @return the amount of occurrences
+   */
+  public int countOccurrences(String sequence) {
+    String substring = underlying.substring(0, position);
+    if (sequence.length() == 1) {
+      return (int) substring.chars()
+          .filter(it -> it == sequence.charAt(0))
+          .count();
+    }
+
+    int count = 0;
+    RingBuffer<Character> expected = RingBuffer.forCharArray(sequence.toCharArray());
+
+    RingBuffer<Character> rollingLast = new RingBuffer<>(sequence.length());
+    for (char c : underlying.toCharArray()) {
+      rollingLast.add(c);
+      if (expected.equals(rollingLast)) {
+        count++;
+      }
+    }
+
+    return count;
   }
 }

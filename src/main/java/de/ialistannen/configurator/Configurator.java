@@ -54,7 +54,7 @@ public class Configurator {
   private static final String TARGET_DIR = "t";
   private static final String HELP = "h";
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
     try {
@@ -95,19 +95,19 @@ public class Configurator {
       );
     }
 
-    Config config = Config.loadConfig(
-        String.join(System.lineSeparator(), Files.readAllLines(configPath))
-    );
-
-    RenderTargetCollector targetCollector = new RenderTargetCollector();
-    Map<String, MultiTargetRenderer> targets = targetCollector.collectTargets(basePath);
-    Reactor reactor = new Reactor(config.getPhasesAsObject(), targets);
-
-    Pair<List<FileRenderedObject>, RenderContext> rendered = reactor.renderAll(
-        new PhaseContext()
-    );
-
     try {
+      Config config = Config.loadConfig(
+          String.join(System.lineSeparator(), Files.readAllLines(configPath))
+      );
+
+      RenderTargetCollector targetCollector = new RenderTargetCollector();
+      Map<String, MultiTargetRenderer> targets = targetCollector.collectTargets(basePath);
+      Reactor reactor = new Reactor(config.getPhasesAsObject(), targets);
+
+      Pair<List<FileRenderedObject>, RenderContext> rendered = reactor.renderAll(
+          new PhaseContext()
+      );
+
       boolean dry = cmd.hasOption(DRY_RUN);
       boolean printFileContents = cmd.hasOption(PRINT_CONTENTS);
       boolean preserveActionsDir = cmd.hasOption(PRESERVE_ACTIONS_DIR);
@@ -142,43 +142,48 @@ public class Configurator {
       }
 
       new PostActionRunner(dry, printFileContents).run(rendered.getSecond());
-    } catch (DistributionException e) {
-      e.printStackTrace();
-    }
 
-    if (cmd.hasOption(PRINT_CONTEXT)) {
-      String contextHeader = "  ____            _            _\n"
-          + " / ___|___  _ __ | |_ _____  _| |_\n"
-          + "| |   / _ \\| '_ \\| __/ _ \\ \\/ / __|\n"
-          + "| |__| (_) | | | | ||  __/>  <| |_\n"
-          + " \\____\\___/|_| |_|\\__\\___/_/\\_\\\\__|\n";
-      printHeader(contextHeader);
-      colorOut(BLUE.toString() + BOLD + UNDERLINE + "Values:");
-      String values = rendered.getSecond().getAllValues().entrySet()
-          .stream()
-          .sorted(Entry.comparingByKey())
-          .map(entry -> MAGENTA + entry.getKey() + "=" + GREEN + entry.getValue())
-          .collect(Collectors.joining(", "));
-      colorOut(values);
-      colorOut(DIM.toString() + UNDERLINE + repeat(" ", 40));
-      colorOut(BRIGHT_BLUE.toString() + BOLD + UNDERLINE + "Actions:");
-      String actionNames = rendered.getSecond()
-          .getAllActions()
-          .stream()
-          .map(act -> act.getName() + (act.isHideFromRunAll() ? "(\uD83D\uDC7B)" : ""))
-          .sorted()
-          .collect(Collectors.joining(", "));
-      colorOut(MAGENTA + actionNames);
-      colorOut(DIM.toString() + UNDERLINE + repeat(" ", 40));
-      colorOut(BRIGHT_BLUE.toString() + BOLD + UNDERLINE + "Post scripts:");
-      String postScriptStarts = rendered.getSecond()
-          .getAllPostScripts()
-          .stream()
-          .map(it -> it.replaceFirst("#.+", ""))
-          .map(it -> it.substring(0, Math.min(it.length(), 10)).trim())
-          .sorted()
-          .collect(Collectors.joining(", "));
-      colorOut(MAGENTA + postScriptStarts);
+      if (cmd.hasOption(PRINT_CONTEXT)) {
+        String contextHeader = "  ____            _            _\n"
+            + " / ___|___  _ __ | |_ _____  _| |_\n"
+            + "| |   / _ \\| '_ \\| __/ _ \\ \\/ / __|\n"
+            + "| |__| (_) | | | | ||  __/>  <| |_\n"
+            + " \\____\\___/|_| |_|\\__\\___/_/\\_\\\\__|\n";
+        printHeader(contextHeader);
+        colorOut(BLUE.toString() + BOLD + UNDERLINE + "Values:");
+        String values = rendered.getSecond().getAllValues().entrySet()
+            .stream()
+            .sorted(Entry.comparingByKey())
+            .map(entry -> MAGENTA + entry.getKey() + "=" + GREEN + entry.getValue())
+            .collect(Collectors.joining(", "));
+        colorOut(values);
+        colorOut(DIM.toString() + UNDERLINE + repeat(" ", 40));
+        colorOut(BRIGHT_BLUE.toString() + BOLD + UNDERLINE + "Actions:");
+        String actionNames = rendered.getSecond()
+            .getAllActions()
+            .stream()
+            .map(act -> act.getName() + (act.isHideFromRunAll() ? "(\uD83D\uDC7B)" : ""))
+            .sorted()
+            .collect(Collectors.joining(", "));
+        colorOut(MAGENTA + actionNames);
+        colorOut(DIM.toString() + UNDERLINE + repeat(" ", 40));
+        colorOut(BRIGHT_BLUE.toString() + BOLD + UNDERLINE + "Post scripts:");
+        String postScriptStarts = rendered.getSecond()
+            .getAllPostScripts()
+            .stream()
+            .map(it -> it.replaceFirst("#.+", ""))
+            .map(it -> it.substring(0, Math.min(it.length(), 10)).trim())
+            .sorted()
+            .collect(Collectors.joining(", "));
+        colorOut(MAGENTA + postScriptStarts);
+      }
+    } catch (DistributionException | IOException e) {
+      if (e.getCause() != null) {
+        colorErr(RED + e.getMessage() + ": ");
+        colorErr("\t" + RED + e.getCause().getMessage());
+      } else {
+        colorErr(RED + e.getMessage());
+      }
     }
   }
 

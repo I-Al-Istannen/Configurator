@@ -1,5 +1,9 @@
 package de.ialistannen.configurator.util;
 
+import static de.ialistannen.configurator.output.TerminalColor.BLUE;
+import static de.ialistannen.configurator.output.TerminalColor.GREEN;
+import static de.ialistannen.configurator.output.TerminalColor.RED;
+
 /**
  * An exception that occurred during parsing.
  */
@@ -23,12 +27,27 @@ public class ParseException extends Exception {
   private static String getContext(StringReader input, String detail) {
     int start = input.getPosition();
     start = Math.max(start - CONTEXT_LENGTH, 0);
-    String contextString = input.getUnderlying().substring(start, input.getPosition());
+    String contextString = input.getUnderlying().substring(start, input.getPosition())
+        .replaceAll("\\n", "⏎");
+
+    int end = Math.min(input.getPosition() + CONTEXT_LENGTH, input.getUnderlying().length());
+    String contextAfterString = input.getUnderlying().substring(input.getPosition(), end)
+        .replaceAll("\\n", "⏎");
+
+    String lineString = " (line " + input.getLineNumber() + ")";
 
     if (!detail.isEmpty()) {
-      return detail + " at '" + contextString + "<---[HERE]";
+      return GREEN + detail
+          + RED + " at "
+          + BLUE + contextString
+          + RED + "<-[HERE]"
+          + BLUE + contextAfterString
+          + RED + lineString;
     }
 
-    return contextString + "<---[HERE]";
+    return BLUE + contextString
+        + RED + "<-[HERE]"
+        + BLUE + contextAfterString
+        + RED + lineString;
   }
 }
