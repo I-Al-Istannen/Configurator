@@ -13,7 +13,6 @@ import static de.ialistannen.configurator.output.TerminalColor.RESET;
 import static de.ialistannen.configurator.output.TerminalColor.UNDERLINE;
 
 import de.ialistannen.configurator.config.Config;
-import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.context.PhaseContext;
 import de.ialistannen.configurator.context.RenderContext;
 import de.ialistannen.configurator.exception.DistributionException;
@@ -166,7 +165,7 @@ public class Configurator {
       String actionNames = rendered.getSecond()
           .getAllActions()
           .stream()
-          .map(Action::getName)
+          .map(act -> act.getName() + (act.isHideFromRunAll() ? "(\uD83D\uDC7B)" : ""))
           .sorted()
           .collect(Collectors.joining(", "));
       colorOut(MAGENTA + actionNames);
