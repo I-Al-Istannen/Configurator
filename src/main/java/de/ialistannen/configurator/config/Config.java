@@ -51,11 +51,19 @@ public class Config {
     List<String> phases = new ArrayList<>();
     StringReader reader = new StringReader(content);
 
+    while (reader.peek() == '#') {
+      reader.readLine();
+    }
+
     if (!reader.readLine().trim().equals("phases:")) {
       throw new IllegalArgumentException("Invalid config, expected 'phases:' at the start");
     }
 
     while (reader.canRead()) {
+      if (reader.peek() == '#') {
+        reader.readLine();
+        continue;
+      }
       reader.readRegex(Pattern.compile("\\s*-\\s*"));
       String phaseName = reader.readLine();
       phases.add(phaseName);
