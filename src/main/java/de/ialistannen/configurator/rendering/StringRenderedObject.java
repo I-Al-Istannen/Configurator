@@ -1,20 +1,14 @@
 package de.ialistannen.configurator.rendering;
 
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.Data;
 
 /**
  * A {@link RenderedObject} that just returns a string.
  */
-@EqualsAndHashCode
-@ToString
+@Data
 public class StringRenderedObject implements RenderedObject {
 
-  private String content;
-
-  public StringRenderedObject(String content) {
-    this.content = content;
-  }
+  private final String content;
 
   @Override
   public String asString() {

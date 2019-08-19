@@ -4,20 +4,16 @@ import de.ialistannen.configurator.context.RenderContext;
 import de.ialistannen.configurator.util.Pair;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import lombok.RequiredArgsConstructor;
 
 /**
  * A {@link RenderTarget} that knows where to place the output.
  */
+@RequiredArgsConstructor
 public class FileRenderTarget implements RenderTarget<FileRenderedObject> {
 
-  private RenderTarget<? extends RenderedObject> underlying;
-  private RenderTarget<? extends RenderedObject> targetPathTarget;
-
-  public FileRenderTarget(RenderTarget<? extends RenderedObject> underlying,
-      RenderTarget<? extends RenderedObject> targetPathTarget) {
-    this.underlying = underlying;
-    this.targetPathTarget = targetPathTarget;
-  }
+  private final RenderTarget<? extends RenderedObject> underlying;
+  private final RenderTarget<? extends RenderedObject> targetPathTarget;
 
   @Override
   public Pair<FileRenderedObject, RenderContext> render(RenderContext context) {

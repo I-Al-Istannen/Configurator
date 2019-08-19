@@ -15,8 +15,8 @@ import java.util.Map;
  */
 public class Reactor {
 
-  private List<Phase> phases;
-  private Map<String, MultiTargetRenderer> targets;
+  private final List<Phase> phases;
+  private final Map<String, MultiTargetRenderer> targets;
 
   /**
    * Creates a new reactor.

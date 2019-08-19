@@ -3,17 +3,15 @@ package de.ialistannen.configurator.dsl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.Data;
 
 /**
  * A node that collects multiple other nodes together. A scope/block in other languages.
  */
-@ToString
-@EqualsAndHashCode
+@Data
 public class BlockAstNode implements AstNode {
 
-  private List<AstNode> children;
+  private final List<AstNode> children;
 
   public BlockAstNode(List<AstNode> children) {
     this.children = new ArrayList<>(children);

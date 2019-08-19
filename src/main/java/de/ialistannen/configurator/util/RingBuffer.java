@@ -16,6 +16,11 @@ public class RingBuffer<E> extends AbstractQueue<E> {
   private final int capacity;
   private ArrayDeque<E> underlying;
 
+  /**
+   * Creates a new ring buffer with the specified capacity.
+   *
+   * @param capacity the capacity
+   */
   public RingBuffer(int capacity) {
     this.capacity = capacity;
     this.underlying = new ArrayDeque<>(capacity);

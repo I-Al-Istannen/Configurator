@@ -15,7 +15,7 @@ public class StringReader {
 
   private static Set<Character> QUOTE_CHARS = new HashSet<>(Arrays.asList('"', '\''));
 
-  private String underlying;
+  private final String underlying;
   private int position;
 
   /**
