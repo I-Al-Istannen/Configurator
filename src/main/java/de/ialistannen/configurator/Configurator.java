@@ -86,7 +86,7 @@ public class Configurator {
     } else {
       basePath = getOwnPath();
     }
-    Path configPath = basePath.resolve(".configurator.yaml");
+    Path configPath = basePath.resolve(".configurator");
 
     if (!Files.isRegularFile(configPath)) {
       throw panic(
