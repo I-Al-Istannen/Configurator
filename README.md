@@ -32,10 +32,10 @@ Additionally a few example dotfiles are provided at the end to showcase various 
    + [Dry run start](#dry-run-start)
    + [Run Action](#run-action)
 9. [Sample files](#sample-files)
-   + [`default_vars.conf`](#-default-varsconf-)
-   + [`actions/brightness.conf`](#-actions-brightnessconf-)
-   + [`themes/selected_theme.conf`](#-themes-selected-themeconf-)
-   + [`actions/switch_theme.conf`](#-actions-switch-themeconf-)
+   + [`default_vars.conf`](#default_varsconf)
+   + [`actions/brightness.conf`](#actionsbrightnessconf)
+   + [`themes/selected_theme.conf`](#themesselected_themeconf)
+   + [`actions/switch_theme.conf`](#actionsswitch_themeconf)
 
 # Features
 
