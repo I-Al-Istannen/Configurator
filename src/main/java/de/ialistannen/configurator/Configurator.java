@@ -15,6 +15,7 @@ import static de.ialistannen.configurator.output.TerminalColor.UNDERLINE;
 import de.ialistannen.configurator.config.Config;
 import de.ialistannen.configurator.context.PhaseContext;
 import de.ialistannen.configurator.context.RenderContext;
+import de.ialistannen.configurator.context.RenderedAction;
 import de.ialistannen.configurator.exception.DistributionException;
 import de.ialistannen.configurator.execution.ActionDistributor;
 import de.ialistannen.configurator.execution.DirBasedActionDistributor;
@@ -150,6 +151,7 @@ public class Configurator {
             + "| |__| (_) | | | | ||  __/>  <| |_\n"
             + " \\____\\___/|_| |_|\\__\\___/_/\\_\\\\__|\n";
         printHeader(contextHeader);
+
         colorOut(BLUE.toString() + BOLD + UNDERLINE + "Values:");
         String values = rendered.getSecond().getAllValues().entrySet()
             .stream()
@@ -158,6 +160,7 @@ public class Configurator {
             .collect(Collectors.joining(", "));
         colorOut(values);
         colorOut(DIM.toString() + UNDERLINE + repeat(" ", 40));
+
         colorOut(BRIGHT_BLUE.toString() + BOLD + UNDERLINE + "Actions:");
         String actionNames = rendered.getSecond()
             .getAllActions()
@@ -167,6 +170,17 @@ public class Configurator {
             .collect(Collectors.joining(", "));
         colorOut(MAGENTA + actionNames);
         colorOut(DIM.toString() + UNDERLINE + repeat(" ", 40));
+
+        colorOut(BRIGHT_BLUE.toString() + BOLD + UNDERLINE + "Reload actions:");
+        String reloadActionNames = rendered.getSecond()
+            .getAllReloadActions()
+            .stream()
+            .map(RenderedAction::getName)
+            .sorted()
+            .collect(Collectors.joining(", "));
+        colorOut(MAGENTA + reloadActionNames);
+        colorOut(DIM.toString() + UNDERLINE + repeat(" ", 40));
+
         colorOut(BRIGHT_BLUE.toString() + BOLD + UNDERLINE + "Post scripts:");
         String postScriptStarts = rendered.getSecond()
             .getAllPostScripts()
