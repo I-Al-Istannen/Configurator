@@ -9,20 +9,18 @@ import static de.ialistannen.configurator.output.TerminalColor.MAGENTA;
 import de.ialistannen.configurator.context.RenderContext;
 import de.ialistannen.configurator.context.RenderedAction;
 import de.ialistannen.configurator.exception.DistributionException;
+import de.ialistannen.configurator.execution.inbuiltactions.ReloadAction;
+import de.ialistannen.configurator.execution.inbuiltactions.RunAllAction;
+import de.ialistannen.configurator.util.FileUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -47,37 +45,12 @@ public class DirBasedActionDistributor implements ActionDistributor {
     Path baseDir = Paths.get(dir);
     try {
       if (!preserveActionsDir) {
-        deleteDirectory(baseDir);
+        FileUtils.deleteDirectory(baseDir, dry);
       }
-      distribute(generateRunScript(context, baseDir), baseDir);
+      distribute(addInbuiltActions(context, baseDir), baseDir);
     } catch (IOException e) {
       throw new DistributionException("Error distributing actions", e);
     }
-  }
-
-  private void deleteDirectory(Path baseDir) throws IOException {
-    colorOut(BRIGHT_MAGENTA + "Deleting actions dir");
-    Files.walkFileTree(baseDir, new SimpleFileVisitor<Path>() {
-      @Override
-      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        if (!dry) {
-          Files.delete(file);
-        } else {
-          colorOut(BRIGHT_MAGENTA + "Deleting file " + GREEN + file.toAbsolutePath());
-        }
-        return FileVisitResult.CONTINUE;
-      }
-
-      @Override
-      public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-        if (!dry) {
-          Files.delete(dir);
-        } else {
-          colorOut(BRIGHT_MAGENTA + "Deleting dir " + GREEN + dir.toAbsolutePath());
-        }
-        return FileVisitResult.CONTINUE;
-      }
-    });
   }
 
   private void distribute(RenderContext context, Path baseDir) throws IOException {
@@ -112,6 +85,15 @@ public class DirBasedActionDistributor implements ActionDistributor {
     }
   }
 
+  private RenderContext addInbuiltActions(RenderContext context, Path baseDir) {
+    Function<RenderedAction, Path> resolver = action -> resolveActionPath(baseDir, action);
+
+    context = context.storeAction(new ReloadAction(resolver).render(context));
+    context = context.storeAction(new RunAllAction(resolver).render(context));
+
+    return context;
+  }
+
   private Path resolveActionPath(Path baseDir, RenderedAction action) {
     return baseDir.resolve(action.getSanitizedName());
   }
@@ -121,72 +103,5 @@ public class DirBasedActionDistributor implements ActionDistributor {
     existingPerms.add(PosixFilePermission.OWNER_EXECUTE);
 
     Files.setPosixFilePermissions(path, existingPerms);
-  }
-
-  private RenderContext generateRunScript(RenderContext context, Path baseDir) {
-    StringBuilder runAction = new StringBuilder();
-    runAction.append("#/bin/env bash").append(System.lineSeparator())
-        .append("# vim: ft=sh").append(System.lineSeparator());
-
-    List<RenderedAction> allActions = context.getAllActions()
-        .stream()
-        .filter(it -> !it.isHideFromRunAll())
-        .sorted(Comparator.comparing(RenderedAction::getName))
-        .collect(Collectors.toList());
-
-    List<String> actionNames = allActions
-        .stream()
-        .map(RenderedAction::getName)
-        .sorted()
-        .collect(Collectors.toList());
-    runAction.append(buildRunScriptRofiInvocation(actionNames));
-    runAction.append(System.lineSeparator());
-
-    runAction.append(buildRunScriptCase(allActions, baseDir));
-
-    return context.storeAction(new RenderedAction(
-        "Run action",
-        "Run_action",
-        runAction.toString(),
-        true
-    ));
-  }
-
-  private String buildRunScriptRofiInvocation(List<String> names) {
-    StringBuilder result = new StringBuilder("CHOICE=$((");
-    String separator = "`";
-    for (String name : names) {
-      result.append("echo -n '").append(name).append(separator).append("' ").append("; ");
-    }
-    result.append(") | rofi -sep '")
-        .append(separator)
-        .append("' -dmenu -p '' -matching fuzzy -i -no-custom -scroll-method 1)");
-    return result.toString();
-  }
-
-  private String buildRunScriptCase(List<RenderedAction> actions, Path baseDir) {
-    StringBuilder result = new StringBuilder()
-        .append("if [ $? -eq 0 ]; then")
-        .append(System.lineSeparator())
-        .append("    case $CHOICE in")
-        .append(System.lineSeparator());
-
-    for (RenderedAction action : actions) {
-      result.append("        '")
-          .append(action.getName())
-          .append("')").append(System.lineSeparator())
-          .append("            (sleep 0.2 && ").append(resolveActionPath(baseDir, action))
-          .append(") &")
-          .append(System.lineSeparator())
-          .append("            ;;").append(System.lineSeparator());
-    }
-    result.append("    esac").append(System.lineSeparator())
-        .append("    exit").append(System.lineSeparator())
-        .append("else").append(System.lineSeparator())
-        .append("    echo \"Rofi returned failure\"").append(System.lineSeparator())
-        .append("    exit").append(System.lineSeparator())
-        .append("fi")
-        .append(System.lineSeparator());
-    return result.toString();
   }
 }

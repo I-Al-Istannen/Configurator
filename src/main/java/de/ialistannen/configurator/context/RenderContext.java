@@ -89,7 +89,7 @@ public interface RenderContext {
    * @param content the content
    * @return the render context
    */
-  RenderContext addPostScript(String content);
+  RenderContext storePostScript(String content);
 
   /**
    * Returns all scripts that will be run at the end.

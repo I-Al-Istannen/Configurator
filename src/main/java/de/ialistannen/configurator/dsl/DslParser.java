@@ -166,7 +166,7 @@ public class DslParser {
         "reload",
         (name, content) -> {
           AstNode inner = new DslParser(new StringReader(content), commandPrefix).parse();
-          return new ReloadActionAstNode(new Action(name, inner, false));
+          return new ReloadActionAstNode(new Action("Reload " + name, inner, false));
         }
     );
   }

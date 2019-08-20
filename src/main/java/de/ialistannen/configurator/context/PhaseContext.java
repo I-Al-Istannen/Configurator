@@ -93,11 +93,23 @@ public class PhaseContext implements RenderContext {
       }
     }
 
+    for (RenderedAction reloadAction : other.getAllReloadActions()) {
+      if (!reloadActions.contains(reloadAction)) {
+        result = result.storeReloadAction(reloadAction);
+      }
+    }
+
+    for (String postScript : other.getAllPostScripts()) {
+      if (!postActions.contains(postScript)) {
+        result = result.storePostScript(postScript);
+      }
+    }
+
     return result;
   }
 
   @Override
-  public RenderContext addPostScript(String content) {
+  public RenderContext storePostScript(String content) {
     return new PhaseContext(values, actions, postActions.plus(content), reloadActions);
   }
 

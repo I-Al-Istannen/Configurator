@@ -366,8 +366,8 @@ class StringRenderTargetTest {
         .extracting(RenderContext::getAllReloadActions)
         .asInstanceOf(list(RenderedAction.class))
         .containsExactly(new RenderedAction(
-            "Test me!",
-            "Test_me!",
+            "Reload Test me!",
+            "Reload_Test_me!",
             "am content 'ä'\n",
             false
         ));

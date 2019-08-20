@@ -95,8 +95,8 @@ public class JavaScriptScript implements Script {
     }
 
     @Override
-    public RenderContext addPostScript(String content) {
-      underlying = underlying.addPostScript(content);
+    public RenderContext storePostScript(String content) {
+      underlying = underlying.storePostScript(content);
       return this;
     }
 
