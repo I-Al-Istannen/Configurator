@@ -18,7 +18,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +39,7 @@ public class DirBasedActionDistributor implements ActionDistributor {
 
   @Override
   public void distributeActions(RenderContext context) throws DistributionException {
-    if (context.getAllActions().isEmpty()) {
+    if (context.getAllActions().isEmpty() && context.getAllReloadActions().isEmpty()) {
       return;
     }
     String dir = context.<String>getValueOpt(BASE_DIR_KEY)
@@ -66,7 +68,10 @@ public class DirBasedActionDistributor implements ActionDistributor {
       throw new IOException(baseDir.toAbsolutePath() + " is no directory");
     }
 
-    for (RenderedAction action : context.getAllActions()) {
+    List<RenderedAction> actions = new ArrayList<>(context.getAllActions());
+    actions.addAll(context.getAllReloadActions());
+
+    for (RenderedAction action : actions) {
       Path actionPath = resolveActionPath(baseDir, action);
       String content = action.getContent();
 
