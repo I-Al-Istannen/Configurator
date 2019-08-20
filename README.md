@@ -18,6 +18,7 @@ Additionally a few example dotfiles are provided at the end to showcase various 
    * [Variable expansion](#variable-expansion)
    * [Command output](#command-output)
    * [Actions](#actions)
+   * [Reload actions](#reload-actions)
    * [Calling an action](#calling-an-action)
    * [Calling an action inline, e.g. to eval the result](#calling-an-action-inline--eg-to-eval-the-result)
    * [If statements](#if-statements)
@@ -103,8 +104,8 @@ E.g.
 Actions will be written to the `actions_dir` variable (so define that one!). This also means that you can send each action to `/dev/null` in their `Target Path`.
 All actions will be made executable, so I'd advice you to add the `actions_dir` to the path somewhere: `export PATH="${PATH}:{{$actions_dir}}"`.
 ```bash
-# action Name
-# end action
+<command prefix> action Name
+<command prefix> end action
 ```
 E.g.
 
@@ -116,6 +117,22 @@ echo "Hello world"
 ```
 
 If you define an action using `action*` and `end action*`, the action *will not be listed in Run Action dialog*. This can be nice for auxiliary actions.
+
+## Reload actions
+Reload actions are just like actions, but there is some special handling for them: They start with `reload`, not `action`, and a `Reload all` action that calls all registered reload actions will automatically be generated.
+
+```bash
+<command prefix> reload Name
+<command prefix> end reload
+```
+E.g.
+
+```bash
+# reload Reload i3
+#!/bin/sh
+i3-msg reload
+# end reload
+```
 
 ## Calling an action
 ```bash
