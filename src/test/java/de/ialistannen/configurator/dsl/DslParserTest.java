@@ -243,7 +243,7 @@ class DslParserTest {
         + "# end reload";
     assertThat(getParsedResult(input)).isEqualTo(wrapInBlock(
         new ReloadActionAstNode(new Action(
-            "Reload i3",
+            "i3",
             wrapInBlock(
                 new LiteralAstNode("#!/usr/bin/env bash\n"),
                 new LiteralAstNode(contentLineOne),
