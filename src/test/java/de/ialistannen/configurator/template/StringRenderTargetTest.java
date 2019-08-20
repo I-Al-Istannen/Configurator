@@ -344,6 +344,33 @@ class StringRenderTargetTest {
         .containsExactly(script);
   }
 
+  @Test
+  public void relodActionAdded() throws ParseException {
+    String input = getPrefix()
+        + "# reload Test me!\n"
+        + "am content 'ä'\n"
+        + "# end reload";
+    assertThat(getResult(new PhaseContext(), input))
+        .isEqualTo("");
+
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllValues)
+        .asInstanceOf(map(String.class, Object.class))
+        .isEmpty();
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllActions)
+        .asInstanceOf(list(Action.class))
+        .isEmpty();
+    assertThat(getContext(new PhaseContext(), input))
+        .extracting(RenderContext::getAllReloadActions)
+        .asInstanceOf(list(Action.class))
+        .containsExactly(new Action("Test me!",
+            new BlockAstNode(Collections.singletonList(new LiteralAstNode("am content 'ä'\n"))),
+            false
+        ));
+  }
+
+
   private String getResult(RenderContext context, String input) throws ParseException {
     return new StringRenderTarget(input).render(context).getFirst().asString();
   }

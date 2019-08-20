@@ -96,4 +96,12 @@ public interface AstVisitor<T> {
    * @return the return value this visitor chose
    */
   T visitExecuteFile(ExecuteFileAstNode node);
+
+  /**
+   * Called for each reload action node.
+   *
+   * @param node the reload action node
+   * @return the return value this visitor chose
+   */
+  T visitReloadAction(ReloadActionAstNode node);
 }

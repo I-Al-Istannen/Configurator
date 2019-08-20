@@ -12,6 +12,7 @@ import de.ialistannen.configurator.dsl.DslParser;
 import de.ialistannen.configurator.dsl.ExecuteFileAstNode;
 import de.ialistannen.configurator.dsl.IfAstNode;
 import de.ialistannen.configurator.dsl.LiteralAstNode;
+import de.ialistannen.configurator.dsl.ReloadActionAstNode;
 import de.ialistannen.configurator.dsl.ScriptAstNode;
 import de.ialistannen.configurator.dsl.ShellCommandAstNode;
 import de.ialistannen.configurator.dsl.VariableAstNode;
@@ -183,6 +184,12 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
       String file = node.getContent().accept(this);
       context = context.addPostScript(file);
       return file;
+    }
+
+    @Override
+    public String visitReloadAction(ReloadActionAstNode node) {
+      context = context.storeReloadAction(node.getAction());
+      return "";
     }
   }
 }

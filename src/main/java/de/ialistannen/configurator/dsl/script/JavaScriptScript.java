@@ -104,5 +104,16 @@ public class JavaScriptScript implements Script {
     public List<String> getAllPostScripts() {
       return underlying.getAllPostScripts();
     }
+
+    @Override
+    public RenderContext storeReloadAction(Action action) {
+      underlying = underlying.storeReloadAction(action);
+      return this;
+    }
+
+    @Override
+    public List<Action> getAllReloadActions() {
+      return underlying.getAllReloadActions();
+    }
   }
 }

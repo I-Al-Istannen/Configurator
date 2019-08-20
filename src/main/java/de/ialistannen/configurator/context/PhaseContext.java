@@ -25,9 +25,10 @@ public class PhaseContext implements RenderContext {
   private HashPMap<String, Object> values;
   private HashPMap<String, Action> actions;
   private ConsPStack<String> postActions;
+  private ConsPStack<Action> reloadActions;
 
   public PhaseContext() {
-    this(HashTreePMap.empty(), HashTreePMap.empty(), ConsPStack.empty());
+    this(HashTreePMap.empty(), HashTreePMap.empty(), ConsPStack.empty(), ConsPStack.empty());
   }
 
   @Override
@@ -44,7 +45,7 @@ public class PhaseContext implements RenderContext {
 
   @Override
   public <T> PhaseContext storeValue(String key, T val) {
-    return new PhaseContext(values.plus(key, val), actions, postActions);
+    return new PhaseContext(values.plus(key, val), actions, postActions, reloadActions);
   }
 
   @Override
@@ -54,7 +55,12 @@ public class PhaseContext implements RenderContext {
 
   @Override
   public RenderContext storeAction(Action action) {
-    return new PhaseContext(values, actions.plus(action.getName(), action), postActions);
+    return new PhaseContext(
+        values,
+        actions.plus(action.getName(), action),
+        postActions,
+        reloadActions
+    );
   }
 
   @Override
@@ -92,11 +98,23 @@ public class PhaseContext implements RenderContext {
 
   @Override
   public RenderContext addPostScript(String content) {
-    return new PhaseContext(values, actions, postActions.plus(content));
+    return new PhaseContext(values, actions, postActions.plus(content), reloadActions);
   }
 
   @Override
   public List<String> getAllPostScripts() {
     return postActions;
+  }
+
+  @Override
+  public RenderContext storeReloadAction(Action action) {
+    return new PhaseContext(
+        values, actions, postActions, reloadActions.plus(action)
+    );
+  }
+
+  @Override
+  public List<Action> getAllReloadActions() {
+    return Collections.unmodifiableList(reloadActions);
   }
 }

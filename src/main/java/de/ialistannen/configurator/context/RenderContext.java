@@ -97,4 +97,19 @@ public interface RenderContext {
    * @return all scripts to run at the end
    */
   List<String> getAllPostScripts();
+
+  /**
+   * Stores a new reload action.
+   *
+   * @param action the action
+   * @return the render context
+   */
+  RenderContext storeReloadAction(Action action);
+
+  /**
+   * Returns all scripts that will reload a program.
+   *
+   * @return all scripts that reload a program
+   */
+  List<Action> getAllReloadActions();
 }

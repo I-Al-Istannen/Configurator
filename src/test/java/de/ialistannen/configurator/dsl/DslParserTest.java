@@ -231,6 +231,29 @@ class DslParserTest {
     ));
   }
 
+  @Test
+  public void parseReloadAction() throws ParseException {
+    String contentLineTwo = "echo 'My friend'\n";
+    String contentLineOne = "echo 'Hello world!'\n";
+    String content = contentLineOne + contentLineTwo;
+
+    String input = "# reload i3\n"
+        + "#!/usr/bin/env bash\n"
+        + content
+        + "# end reload";
+    assertThat(getParsedResult(input)).isEqualTo(wrapInBlock(
+        new ReloadActionAstNode(new Action(
+            "i3",
+            wrapInBlock(
+                new LiteralAstNode("#!/usr/bin/env bash\n"),
+                new LiteralAstNode(contentLineOne),
+                new LiteralAstNode(contentLineTwo)
+            ),
+            false
+        ))
+    ));
+  }
+
   private AstNode getParsedResult(String input) throws ParseException {
     return new DslParser(new StringReader("Command prefix: #\n" + input)).parse();
   }

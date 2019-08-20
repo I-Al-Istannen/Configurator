@@ -154,9 +154,21 @@ public class DslParser {
         return readCall(input);
       case "execute":
         return readExecute();
+      case "reload":
+        return readReload();
       default:
         return readAssignment();
     }
+  }
+
+  private AstNode readReload() throws ParseException {
+    return readNamedEnclosed(
+        "reload",
+        (name, content) -> {
+          AstNode inner = new DslParser(new StringReader(content), commandPrefix).parse();
+          return new ReloadActionAstNode(new Action(name, inner, false));
+        }
+    );
   }
 
   private AstNode readExecute() throws ParseException {
