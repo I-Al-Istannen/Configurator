@@ -9,6 +9,7 @@ import static de.ialistannen.configurator.output.TerminalColor.MAGENTA;
 import de.ialistannen.configurator.context.RenderContext;
 import de.ialistannen.configurator.context.RenderedAction;
 import de.ialistannen.configurator.exception.DistributionException;
+import de.ialistannen.configurator.execution.inbuiltactions.InbuiltAction;
 import de.ialistannen.configurator.execution.inbuiltactions.ReloadAction;
 import de.ialistannen.configurator.execution.inbuiltactions.RunAllAction;
 import de.ialistannen.configurator.util.FileUtils;
@@ -21,6 +22,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
@@ -93,9 +95,17 @@ public class DirBasedActionDistributor implements ActionDistributor {
   private RenderContext addInbuiltActions(RenderContext context, Path baseDir) {
     Function<RenderedAction, Path> resolver = action -> resolveActionPath(baseDir, action);
 
-    context = context.storeAction(new ReloadAction(resolver).render(context));
-    context = context.storeAction(new RunAllAction(resolver).render(context));
+    context = storeReloadAction(context, new ReloadAction(resolver));
+    context = storeReloadAction(context, new RunAllAction(resolver));
 
+    return context;
+  }
+
+  private RenderContext storeReloadAction(RenderContext context, InbuiltAction action) {
+    Optional<RenderedAction> renderedAction = action.render(context);
+    if (renderedAction.isPresent()) {
+      return context.storeAction(renderedAction.get());
+    }
     return context;
   }
 

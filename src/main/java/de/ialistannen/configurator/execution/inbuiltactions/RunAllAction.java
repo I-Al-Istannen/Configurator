@@ -5,6 +5,7 @@ import de.ialistannen.configurator.context.RenderedAction;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -23,13 +24,16 @@ public class RunAllAction extends InbuiltAction {
   }
 
   @Override
-  public RenderedAction render(RenderContext context) {
-    return new RenderedAction(
+  public Optional<RenderedAction> render(RenderContext context) {
+    if (context.getAllActions().isEmpty() && context.getAllReloadActions().isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(new RenderedAction(
         "Run action",
         "Run_action",
         generateRunScript(context),
         false
-    );
+    ));
   }
 
   private String generateRunScript(RenderContext context) {

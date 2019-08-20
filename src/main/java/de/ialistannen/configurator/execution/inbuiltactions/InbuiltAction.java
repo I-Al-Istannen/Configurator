@@ -3,6 +3,7 @@ package de.ialistannen.configurator.execution.inbuiltactions;
 import de.ialistannen.configurator.context.RenderContext;
 import de.ialistannen.configurator.context.RenderedAction;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 
@@ -18,9 +19,9 @@ public abstract class InbuiltAction {
    * Converts this action to an {@link RenderedAction}.
    *
    * @param context the render context
-   * @return the action
+   * @return the action or an empty optional if it doesn't make any sense to generate the action
    */
-  public abstract RenderedAction render(RenderContext context);
+  public abstract Optional<RenderedAction> render(RenderContext context);
 
   /**
    * Resolves the path to an action.

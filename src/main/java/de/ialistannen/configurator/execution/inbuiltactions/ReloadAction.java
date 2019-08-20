@@ -4,6 +4,7 @@ import de.ialistannen.configurator.context.RenderContext;
 import de.ialistannen.configurator.context.RenderedAction;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -21,13 +22,16 @@ public class ReloadAction extends InbuiltAction {
   }
 
   @Override
-  public RenderedAction render(RenderContext context) {
-    return new RenderedAction(
+  public Optional<RenderedAction> render(RenderContext context) {
+    if (context.getAllReloadActions().isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(new RenderedAction(
         "Reload all",
         "Reload_all",
         buildScript(context.getAllReloadActions()),
         false
-    );
+    ));
   }
 
   private String buildScript(List<RenderedAction> reloadActions) {
