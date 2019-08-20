@@ -2,6 +2,7 @@ package de.ialistannen.configurator.template;
 
 import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.context.RenderContext;
+import de.ialistannen.configurator.context.RenderedAction;
 import de.ialistannen.configurator.dsl.ActionAstNode;
 import de.ialistannen.configurator.dsl.ActionCallAstNode;
 import de.ialistannen.configurator.dsl.AssignmentAstNode;
@@ -144,7 +145,12 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
 
     @Override
     public String visitAction(ActionAstNode node) {
-      context = context.storeAction(node.getAction());
+      Action action = node.getAction();
+      String content = action.getContent().accept(this);
+
+      context = context.storeAction(new RenderedAction(
+          action.getName(), action.getSanitizedName(), content, action.isHideFromRunAll()
+      ));
       return "";
     }
 
@@ -188,7 +194,12 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
 
     @Override
     public String visitReloadAction(ReloadActionAstNode node) {
-      context = context.storeReloadAction(node.getAction());
+      Action action = node.getAction();
+      String content = action.getContent().accept(this);
+
+      context = context.storeReloadAction(new RenderedAction(
+          action.getName(), action.getSanitizedName(), content, action.isHideFromRunAll()
+      ));
       return "";
     }
   }

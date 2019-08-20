@@ -50,7 +50,7 @@ public interface RenderContext {
    * @param action the action
    * @return the new render context
    */
-  RenderContext storeAction(Action action);
+  RenderContext storeAction(RenderedAction action);
 
   /**
    * Returns the action with the given name.
@@ -58,7 +58,7 @@ public interface RenderContext {
    * @param name the name of the action
    * @return the action or null
    */
-  Action getAction(String name);
+  RenderedAction getAction(String name);
 
   /**
    * Returns the action with the given name.
@@ -66,14 +66,14 @@ public interface RenderContext {
    * @param name the name of the action
    * @return the action or null
    */
-  Optional<Action> getActionOpt(String name);
+  Optional<RenderedAction> getActionOpt(String name);
 
   /**
    * Returns all actionS.
    *
    * @return the actions
    */
-  List<Action> getAllActions();
+  List<RenderedAction> getAllActions();
 
   /**
    * Merges the two contexts. Keeps the keys of this context if there are conflicts.
@@ -104,12 +104,12 @@ public interface RenderContext {
    * @param action the action
    * @return the render context
    */
-  RenderContext storeReloadAction(Action action);
+  RenderContext storeReloadAction(RenderedAction action);
 
   /**
    * Returns all scripts that will reload a program.
    *
    * @return all scripts that reload a program
    */
-  List<Action> getAllReloadActions();
+  List<RenderedAction> getAllReloadActions();
 }

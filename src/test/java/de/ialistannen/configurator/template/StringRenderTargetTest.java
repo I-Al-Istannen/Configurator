@@ -7,12 +7,10 @@ import static org.assertj.core.api.InstanceOfAssertFactories.map;
 import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.context.PhaseContext;
 import de.ialistannen.configurator.context.RenderContext;
-import de.ialistannen.configurator.dsl.BlockAstNode;
-import de.ialistannen.configurator.dsl.LiteralAstNode;
+import de.ialistannen.configurator.context.RenderedAction;
 import de.ialistannen.configurator.util.ParseException;
 import java.nio.file.Paths;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -151,9 +149,10 @@ class StringRenderTargetTest {
         .isEmpty();
     assertThat(getContext(new PhaseContext(), input))
         .extracting(RenderContext::getAllActions)
-        .asInstanceOf(list(Action.class))
-        .containsExactly(new Action("Test me!",
-            new BlockAstNode(Collections.singletonList(new LiteralAstNode("am content 'ä'\n"))),
+        .asInstanceOf(list(RenderedAction.class))
+        .containsExactly(new RenderedAction("Test me!",
+            "Test_me!",
+            "am content 'ä'\n",
             false
         ));
   }
@@ -173,9 +172,11 @@ class StringRenderTargetTest {
         .isEmpty();
     assertThat(getContext(new PhaseContext(), input))
         .extracting(RenderContext::getAllActions)
-        .asInstanceOf(list(Action.class))
-        .containsExactly(new Action("Test me!",
-            new BlockAstNode(Collections.singletonList(new LiteralAstNode("am content 'ä'\n"))),
+        .asInstanceOf(list(RenderedAction.class))
+        .containsExactly(new RenderedAction(
+            "Test me!",
+            "Test_me!",
+            "am content 'ä'\n",
             true
         ));
   }
@@ -345,7 +346,7 @@ class StringRenderTargetTest {
   }
 
   @Test
-  public void relodActionAdded() throws ParseException {
+  public void reloadActionAdded() throws ParseException {
     String input = getPrefix()
         + "# reload Test me!\n"
         + "am content 'ä'\n"
@@ -363,9 +364,11 @@ class StringRenderTargetTest {
         .isEmpty();
     assertThat(getContext(new PhaseContext(), input))
         .extracting(RenderContext::getAllReloadActions)
-        .asInstanceOf(list(Action.class))
-        .containsExactly(new Action("Test me!",
-            new BlockAstNode(Collections.singletonList(new LiteralAstNode("am content 'ä'\n"))),
+        .asInstanceOf(list(RenderedAction.class))
+        .containsExactly(new RenderedAction(
+            "Test me!",
+            "Test_me!",
+            "am content 'ä'\n",
             false
         ));
   }

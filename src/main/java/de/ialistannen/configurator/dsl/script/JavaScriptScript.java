@@ -1,7 +1,7 @@
 package de.ialistannen.configurator.dsl.script;
 
-import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.context.RenderContext;
+import de.ialistannen.configurator.context.RenderedAction;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -69,23 +69,23 @@ public class JavaScriptScript implements Script {
 
     @Export
     @Override
-    public RenderContext storeAction(Action action) {
+    public RenderContext storeAction(RenderedAction action) {
       underlying = underlying.storeAction(action);
       return this;
     }
 
     @Override
-    public Action getAction(String name) {
+    public RenderedAction getAction(String name) {
       return underlying.getAction(name);
     }
 
     @Override
-    public Optional<Action> getActionOpt(String name) {
+    public Optional<RenderedAction> getActionOpt(String name) {
       return underlying.getActionOpt(name);
     }
 
     @Override
-    public List<Action> getAllActions() {
+    public List<RenderedAction> getAllActions() {
       return underlying.getAllActions();
     }
 
@@ -106,13 +106,13 @@ public class JavaScriptScript implements Script {
     }
 
     @Override
-    public RenderContext storeReloadAction(Action action) {
+    public RenderContext storeReloadAction(RenderedAction action) {
       underlying = underlying.storeReloadAction(action);
       return this;
     }
 
     @Override
-    public List<Action> getAllReloadActions() {
+    public List<RenderedAction> getAllReloadActions() {
       return underlying.getAllReloadActions();
     }
   }

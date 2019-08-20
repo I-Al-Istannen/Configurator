@@ -23,9 +23,9 @@ import org.pcollections.HashTreePMap;
 public class PhaseContext implements RenderContext {
 
   private HashPMap<String, Object> values;
-  private HashPMap<String, Action> actions;
+  private HashPMap<String, RenderedAction> actions;
   private ConsPStack<String> postActions;
-  private ConsPStack<Action> reloadActions;
+  private ConsPStack<RenderedAction> reloadActions;
 
   public PhaseContext() {
     this(HashTreePMap.empty(), HashTreePMap.empty(), ConsPStack.empty(), ConsPStack.empty());
@@ -54,7 +54,7 @@ public class PhaseContext implements RenderContext {
   }
 
   @Override
-  public RenderContext storeAction(Action action) {
+  public RenderContext storeAction(RenderedAction action) {
     return new PhaseContext(
         values,
         actions.plus(action.getName(), action),
@@ -64,24 +64,24 @@ public class PhaseContext implements RenderContext {
   }
 
   @Override
-  public Action getAction(String name) {
+  public RenderedAction getAction(String name) {
     return actions.get(name);
   }
 
   @Override
-  public Optional<Action> getActionOpt(String name) {
+  public Optional<RenderedAction> getActionOpt(String name) {
     return Optional.ofNullable(getAction(name));
   }
 
   @Override
-  public List<Action> getAllActions() {
+  public List<RenderedAction> getAllActions() {
     return new ArrayList<>(actions.values());
   }
 
   @Override
   public RenderContext merge(RenderContext other) {
     RenderContext result = this;
-    for (Action action : other.getAllActions()) {
+    for (RenderedAction action : other.getAllActions()) {
       if (!actions.containsKey(action.getName())) {
         result = result.storeAction(action);
       }
@@ -107,14 +107,14 @@ public class PhaseContext implements RenderContext {
   }
 
   @Override
-  public RenderContext storeReloadAction(Action action) {
+  public RenderContext storeReloadAction(RenderedAction action) {
     return new PhaseContext(
         values, actions, postActions, reloadActions.plus(action)
     );
   }
 
   @Override
-  public List<Action> getAllReloadActions() {
+  public List<RenderedAction> getAllReloadActions() {
     return Collections.unmodifiableList(reloadActions);
   }
 }

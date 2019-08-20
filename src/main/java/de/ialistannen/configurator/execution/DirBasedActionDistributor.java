@@ -6,14 +6,9 @@ import static de.ialistannen.configurator.output.TerminalColor.GRAY;
 import static de.ialistannen.configurator.output.TerminalColor.GREEN;
 import static de.ialistannen.configurator.output.TerminalColor.MAGENTA;
 
-import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.context.RenderContext;
-import de.ialistannen.configurator.dsl.AstNode;
-import de.ialistannen.configurator.dsl.DslParser;
+import de.ialistannen.configurator.context.RenderedAction;
 import de.ialistannen.configurator.exception.DistributionException;
-import de.ialistannen.configurator.template.StringRenderTarget;
-import de.ialistannen.configurator.util.ParseException;
-import de.ialistannen.configurator.util.StringReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
@@ -98,12 +93,9 @@ public class DirBasedActionDistributor implements ActionDistributor {
       throw new IOException(baseDir.toAbsolutePath() + " is no directory");
     }
 
-    for (Action action : context.getAllActions()) {
+    for (RenderedAction action : context.getAllActions()) {
       Path actionPath = resolveActionPath(baseDir, action);
-      String content = StringRenderTarget.fromAst(action.getContent())
-          .render(context)
-          .getFirst()
-          .asString();
+      String content = action.getContent();
 
       if (!dry) {
         Files.write(actionPath, content.getBytes(StandardCharsets.UTF_8));
@@ -120,7 +112,7 @@ public class DirBasedActionDistributor implements ActionDistributor {
     }
   }
 
-  private Path resolveActionPath(Path baseDir, Action action) {
+  private Path resolveActionPath(Path baseDir, RenderedAction action) {
     return baseDir.resolve(action.getSanitizedName());
   }
 
@@ -131,21 +123,20 @@ public class DirBasedActionDistributor implements ActionDistributor {
     Files.setPosixFilePermissions(path, existingPerms);
   }
 
-  private RenderContext generateRunScript(RenderContext context, Path baseDir)
-      throws DistributionException {
+  private RenderContext generateRunScript(RenderContext context, Path baseDir) {
     StringBuilder runAction = new StringBuilder();
     runAction.append("#/bin/env bash").append(System.lineSeparator())
         .append("# vim: ft=sh").append(System.lineSeparator());
 
-    List<Action> allActions = context.getAllActions()
+    List<RenderedAction> allActions = context.getAllActions()
         .stream()
         .filter(it -> !it.isHideFromRunAll())
-        .sorted(Comparator.comparing(Action::getName))
+        .sorted(Comparator.comparing(RenderedAction::getName))
         .collect(Collectors.toList());
 
     List<String> actionNames = allActions
         .stream()
-        .map(Action::getName)
+        .map(RenderedAction::getName)
         .sorted()
         .collect(Collectors.toList());
     runAction.append(buildRunScriptRofiInvocation(actionNames));
@@ -153,13 +144,12 @@ public class DirBasedActionDistributor implements ActionDistributor {
 
     runAction.append(buildRunScriptCase(allActions, baseDir));
 
-    AstNode actionContent;
-    try {
-      actionContent = new DslParser(new StringReader(runAction.toString()), "#").parse();
-    } catch (ParseException e) {
-      throw new DistributionException("Could not create aggregate runner actionA", e);
-    }
-    return context.storeAction(new Action("Run action", actionContent, true));
+    return context.storeAction(new RenderedAction(
+        "Run action",
+        "Run_action",
+        runAction.toString(),
+        true
+    ));
   }
 
   private String buildRunScriptRofiInvocation(List<String> names) {
@@ -174,14 +164,14 @@ public class DirBasedActionDistributor implements ActionDistributor {
     return result.toString();
   }
 
-  private String buildRunScriptCase(List<Action> actions, Path baseDir) {
+  private String buildRunScriptCase(List<RenderedAction> actions, Path baseDir) {
     StringBuilder result = new StringBuilder()
         .append("if [ $? -eq 0 ]; then")
         .append(System.lineSeparator())
         .append("    case $CHOICE in")
         .append(System.lineSeparator());
 
-    for (Action action : actions) {
+    for (RenderedAction action : actions) {
       result.append("        '")
           .append(action.getName())
           .append("')").append(System.lineSeparator())
