@@ -1,4 +1,4 @@
-package de.ialistannen.configurator;
+package de.ialistannen.configurator.cli;
 
 import static de.ialistannen.configurator.output.ColoredOutput.colorErr;
 import static de.ialistannen.configurator.output.ColoredOutput.colorOut;
@@ -37,52 +37,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
 public class Configurator {
 
-  private static final String DRY_RUN = "d";
-  private static final String PRINT_CONTENTS = "f";
-  private static final String STRIP_COLOR = "n";
-  private static final String PRINT_CONTEXT = "c";
-  private static final String PRESERVE_ACTIONS_DIR = "p";
-  private static final String TARGET_DIR = "t";
-  private static final String HELP = "h";
-
   public static void main(String[] args) {
-    CommandLineParser parser = new DefaultParser();
-    CommandLine cmd;
-    try {
-      cmd = parser.parse(getOptions(), args);
-    } catch (ParseException e) {
-      colorErr(RED + e.getMessage());
-      printHelp();
-      return;
-    }
+    CliArgumentSpec spec = CliArgumentSpec_Parser.create().parseOrExit(args);
 
-    if (cmd.hasOption(HELP)) {
-      printHelp();
-      return;
-    }
-
-    ColoredOutput.setStripColour(cmd.hasOption(STRIP_COLOR));
+    ColoredOutput.setStripColour(spec.stripColor());
 
     Path basePath;
-    if (cmd.hasOption(TARGET_DIR)) {
-      basePath = Paths.get(cmd.getOptionValue(TARGET_DIR));
-      if (Files.notExists(basePath) || !Files.isDirectory(basePath)) {
-        throw panic(
-            RED + "The given target path "
-                + BLUE + UNDERLINE + basePath + RESET + RED
-                + " is no directory or does not exist!"
-        );
-      }
+    if (spec.targetDir().isPresent()) {
+      basePath = spec.targetDir().get();
     } else {
       basePath = getOwnPath();
     }
@@ -109,9 +74,9 @@ public class Configurator {
           new PhaseContext()
       );
 
-      boolean dry = cmd.hasOption(DRY_RUN);
-      boolean printFileContents = cmd.hasOption(PRINT_CONTENTS);
-      boolean preserveActionsDir = cmd.hasOption(PRESERVE_ACTIONS_DIR);
+      boolean dry = spec.dry();
+      boolean printFileContents = spec.printFileContents();
+      boolean preserveActionsDir = spec.preserveActionsDir();
 
       if (dry) {
         String dryHeader = " _____                     _   _               ____  _\n"
@@ -144,7 +109,7 @@ public class Configurator {
 
       new PostActionRunner(dry, printFileContents).run(rendered.getSecond());
 
-      if (cmd.hasOption(PRINT_CONTEXT)) {
+      if (spec.printContext()) {
         String contextHeader = "  ____            _            _\n"
             + " / ___|___  _ __ | |_ _____  _| |_\n"
             + "| |   / _ \\| '_ \\| __/ _ \\ \\/ / __|\n"
@@ -201,16 +166,6 @@ public class Configurator {
     }
   }
 
-  private static void printHelp() {
-    new HelpFormatter().printHelp(
-        "configurator",
-        "A simple program to help organize dotfiles.",
-        getOptions(),
-        "Made by <I Al Istannen>",
-        true
-    );
-  }
-
   private static RuntimeException panic(String message) {
     colorErr(message);
     System.exit(1);
@@ -229,67 +184,6 @@ public class Configurator {
       result.append(string);
     }
     return result.toString();
-  }
-
-  private static Options getOptions() {
-    Options options = new Options();
-    options.addOption(Option.builder(DRY_RUN)
-        .longOpt("dry")
-        .hasArg(false)
-        .desc("Whether the program should run without altering files.")
-        .type(Boolean.class)
-        .build()
-    );
-    options.addOption(Option.builder(PRINT_CONTENTS)
-        .longOpt("print-contents")
-        .hasArg(false)
-        .desc("Whether the program should print the whole file contents when running in dry mode.")
-        .type(Boolean.class)
-        .build()
-    );
-    options.addOption(Option.builder(STRIP_COLOR)
-        .longOpt("strip-color")
-        .hasArg(false)
-        .desc("If present the program will not color its output.")
-        .type(Boolean.class)
-        .build()
-    );
-    options.addOption(Option.builder(PRINT_CONTEXT)
-        .longOpt("print-context")
-        .hasArg(false)
-        .desc(
-            "If present the program will print the final context after all rendering steps were completed."
-        )
-        .type(Boolean.class)
-        .build()
-    );
-    options.addOption(Option.builder(PRESERVE_ACTIONS_DIR)
-        .longOpt("preserve-actions-dir")
-        .hasArg(false)
-        .desc(
-            "If present the program will not delete the action dir and preserve manually added actions"
-        )
-        .type(Boolean.class)
-        .build()
-    );
-    options.addOption(Option.builder(TARGET_DIR)
-        .argName("target directory")
-        .longOpt("target-dir")
-        .hasArg(true)
-        .desc(
-            "The path to the configuration directory. If not given the current working directory will be used"
-        )
-        .type(String.class)
-        .build()
-    );
-    options.addOption(Option.builder(HELP)
-        .longOpt("help")
-        .hasArg(false)
-        .desc("Prints the help")
-        .type(Boolean.class)
-        .build()
-    );
-    return options;
   }
 
   private static Path getOwnPath() {
