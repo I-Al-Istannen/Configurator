@@ -11,6 +11,8 @@ import de.ialistannen.configurator.context.RenderedAction;
 import de.ialistannen.configurator.util.ParseException;
 import java.nio.file.Paths;
 import java.util.AbstractMap.SimpleEntry;
+import org.graalvm.polyglot.Engine;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -183,6 +185,13 @@ class StringRenderTargetTest {
 
   @Test
   public void jsScriptRun() throws ParseException {
+    try {
+      Engine.create();
+    } catch (IllegalStateException e) {
+      if (e.getMessage().contains("No language")) {
+        Assumptions.assumeTrue(false, "No scripting support found");
+      }
+    }
     String input = getPrefix()
         + "# script js\n"
         + "context.storeValue(\"Hey\", 20)\n"
