@@ -66,7 +66,7 @@ public class Configurator {
           String.join(System.lineSeparator(), Files.readAllLines(configPath))
       );
 
-      RenderTargetCollector targetCollector = new RenderTargetCollector();
+      RenderTargetCollector targetCollector = new RenderTargetCollector(spec.reportParseErrors());
       Map<String, MultiTargetRenderer> targets = targetCollector.collectTargets(basePath);
       Reactor reactor = new Reactor(config.getPhasesAsObject(), targets);
 

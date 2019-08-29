@@ -384,11 +384,11 @@ class StringRenderTargetTest {
 
 
   private String getResult(RenderContext context, String input) throws ParseException {
-    return new StringRenderTarget(input).render(context).getFirst().asString();
+    return new StringRenderTarget(input, false).render(context).getFirst().asString();
   }
 
   private RenderContext getContext(RenderContext context, String input) throws ParseException {
-    return new StringRenderTarget(input).render(context).getSecond();
+    return new StringRenderTarget(input, false).render(context).getSecond();
   }
 
   private String getPrefix() {

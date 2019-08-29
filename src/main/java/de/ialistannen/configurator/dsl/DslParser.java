@@ -1,8 +1,11 @@
 package de.ialistannen.configurator.dsl;
 
+import static de.ialistannen.configurator.output.ColoredOutput.colorErr;
+
 import de.ialistannen.configurator.context.Action;
 import de.ialistannen.configurator.dsl.comparison.ComparisonAstNode;
 import de.ialistannen.configurator.dsl.script.JavaScriptScript;
+import de.ialistannen.configurator.output.TerminalColor;
 import de.ialistannen.configurator.util.ParseException;
 import de.ialistannen.configurator.util.StringReader;
 import java.util.ArrayList;
@@ -20,16 +23,19 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class DslParser {
 
-  private StringReader input;
+  private final StringReader input;
   private String commandPrefix;
+  private final boolean reportErrors;
 
   /**
    * Creates a new parser for the given input.
    *
    * @param input the input
+   * @param reportErrors whether to report parse errors
    */
-  public DslParser(StringReader input) {
+  public DslParser(StringReader input, boolean reportErrors) {
     this.input = Objects.requireNonNull(input, "input can not be null!");
+    this.reportErrors = reportErrors;
   }
 
   /**
@@ -165,7 +171,9 @@ public class DslParser {
     return readNamedEnclosed(
         "reload",
         (name, content) -> {
-          AstNode inner = new DslParser(new StringReader(content), commandPrefix).parse();
+          AstNode inner = new DslParser(
+              new StringReader(content), commandPrefix, reportErrors
+          ).parse();
           return new ReloadActionAstNode(new Action(name, inner, false));
         }
     );
@@ -175,7 +183,9 @@ public class DslParser {
     return readNamedEnclosed(
         "execute",
         (ignored, content) -> {
-          AstNode script = new DslParser(new StringReader(content), commandPrefix).parse();
+          AstNode script = new DslParser(
+              new StringReader(content), commandPrefix, reportErrors
+          ).parse();
           return new ExecuteFileAstNode(script);
         }
     );
@@ -193,11 +203,11 @@ public class DslParser {
         "if",
         (condition, content) -> {
           AstNode contentNode = new DslParser(
-              new StringReader(content), commandPrefix
+              new StringReader(content), commandPrefix, reportErrors
           )
               .parse(false);
           ComparisonAstNode comparison = new DslParser(
-              new StringReader(condition), commandPrefix
+              new StringReader(condition), commandPrefix, reportErrors
           ).readComparison();
           return new IfAstNode(comparison, contentNode);
         }
@@ -246,7 +256,8 @@ public class DslParser {
   }
 
   private AstNode parseSectionOnString(String input, boolean newline) throws ParseException {
-    return new DslParser(new StringReader(input), commandPrefix).parseSection(newline);
+    return new DslParser(new StringReader(input), commandPrefix, reportErrors)
+        .parseSection(newline);
   }
 
   private AstNode readScript() throws ParseException {
@@ -281,7 +292,9 @@ public class DslParser {
   private AstNode readAction(String keyword, boolean hideFromRunAll) throws ParseException {
     return readNamedEnclosed(keyword,
         (name, content) -> {
-          AstNode inner = new DslParser(new StringReader(content), commandPrefix).parse();
+          AstNode inner = new DslParser(
+              new StringReader(content), commandPrefix, reportErrors
+          ).parse();
           return new ActionAstNode(new Action(name, inner, hideFromRunAll));
         }
     );
@@ -344,6 +357,9 @@ public class DslParser {
     try {
       return Optional.ofNullable(supplier.parse());
     } catch (ParseException e) {
+      if (reportErrors) {
+        colorErr(TerminalColor.RED + "Parse error: " + e.getMessage());
+      }
       reader.reset(start);
       return Optional.empty();
     }

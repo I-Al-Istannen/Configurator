@@ -53,6 +53,13 @@ abstract class CliArgumentSpec {
   public abstract boolean preserveActionsDir();
 
   /**
+   * Whether the program should report all parse errors. A parse error might just be some token that
+   * matches by chance and not an actual error.
+   */
+  @Parameter(shortName = 'r', longName = "report-parse-errors")
+  public abstract boolean reportParseErrors();
+
+  /**
    * The path to the configuration directory. If not given the current working directory will be
    * used.
    */

@@ -1,5 +1,8 @@
 package de.ialistannen.configurator.phases;
 
+import static de.ialistannen.configurator.output.ColoredOutput.colorOut;
+
+import de.ialistannen.configurator.output.TerminalColor;
 import de.ialistannen.configurator.rendering.FileRenderTarget;
 import de.ialistannen.configurator.rendering.RenderTarget;
 import de.ialistannen.configurator.template.StringRenderTarget;
@@ -17,11 +20,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Collects file render targets for a phase.
  */
+@RequiredArgsConstructor
 public class RenderTargetCollector {
+
+  private final boolean reportParseErrors;
 
   /**
    * Collects all targets from a given folder (and subfolders).
@@ -51,13 +58,22 @@ public class RenderTargetCollector {
       private void handleFile(Path file) throws IOException, ParseException {
         List<String> lines = Files.readAllLines(file);
         String phaseName = extractPhaseName(lines);
-        RenderTarget<?> targetPathTarget = StringRenderTarget.singleLine(extractTargetPath(lines));
+        RenderTarget<?> targetPathTarget = StringRenderTarget.singleLine(
+            extractTargetPath(lines), reportParseErrors
+        );
 
         String fileContents = lines.stream()
             .skip(2)
             .collect(Collectors.joining(System.lineSeparator()));
+        if (reportParseErrors) {
+          System.out.println();
+          colorOut(
+              TerminalColor.BRIGHT_MAGENTA + "Parsing "
+                  + TerminalColor.GREEN + file.toAbsolutePath()
+          );
+        }
         FileRenderTarget renderTarget = new FileRenderTarget(
-            new StringRenderTarget(fileContents),
+            new StringRenderTarget(fileContents, reportParseErrors),
             targetPathTarget
         );
 

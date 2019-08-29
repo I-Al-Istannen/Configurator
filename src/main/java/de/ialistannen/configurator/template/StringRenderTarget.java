@@ -43,10 +43,11 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
    * A render target that renders a given String in the common DSL format.
    *
    * @param source the source string
+   * @param reportParseErrors whether to report parse errors
    * @throws ParseException if the string contains errors
    */
-  public StringRenderTarget(String source) throws ParseException {
-    ast = new DslParser(new StringReader(source)).parse();
+  public StringRenderTarget(String source, boolean reportParseErrors) throws ParseException {
+    ast = new DslParser(new StringReader(source), reportParseErrors).parse();
   }
 
   /**
@@ -54,10 +55,12 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
    *
    * @param source the source string
    * @param commandPrefix the command prefix
+   * @param reportParseErrors whether to report parse errors
    * @throws ParseException if the string contains errors
    */
-  private StringRenderTarget(String source, String commandPrefix) throws ParseException {
-    ast = new DslParser(new StringReader(source), commandPrefix).parse();
+  private StringRenderTarget(String source, String commandPrefix, boolean reportParseErrors)
+      throws ParseException {
+    ast = new DslParser(new StringReader(source), commandPrefix, reportParseErrors).parse();
   }
 
   @Override
@@ -71,11 +74,13 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
    * Creates a string render target that handles a single line.
    *
    * @param line the line
+   * @param reportParseErrors whether to report parse errors
    * @return the render target
    * @throws ParseException if an error occurs
    */
-  public static StringRenderTarget singleLine(String line) throws ParseException {
-    return new StringRenderTarget(line, "#");
+  public static StringRenderTarget singleLine(String line, boolean reportParseErrors)
+      throws ParseException {
+    return new StringRenderTarget(line, "#", reportParseErrors);
   }
 
   /**
