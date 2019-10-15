@@ -102,7 +102,7 @@ E.g.
 
 ## Actions
 Actions will be written to the `actions_dir` variable (so define that one!). This also means that you can send each action to `/dev/null` in their `Target Path`.
-All actions will be made executable, so I'd advice you to add the `actions_dir` to the path somewhere: `export PATH="${PATH}:{{$actions_dir}}"`.
+All actions will be made executable, so I'd advise you to add the `actions_dir` to the path somewhere: `export PATH="${PATH}:{{$actions_dir}}"`.
 ```bash
 <command prefix> action Name
 <command prefix> end action
