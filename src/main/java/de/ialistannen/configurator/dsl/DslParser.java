@@ -274,16 +274,21 @@ public class DslParser {
 
   private AstNode readNamedEnclosed(String start, NamedSectionParser creator)
       throws ParseException {
+    return readNamedEnclosed(start, creator, input);
+  }
+
+  private AstNode readNamedEnclosed(String start, NamedSectionParser creator, StringReader input)
+      throws ParseException {
     input.assertRead(start);
     input.readWhile(it -> it == ' ' || it == '\t');
     final String END_MARKER = commandPrefix + " end " + start;
 
     String name = input.readLine();
-    String content = this.input.readUntil(END_MARKER);
+    String content = input.readUntil(END_MARKER);
 
-    this.input.assertRead(END_MARKER);
-    if (this.input.peek(System.lineSeparator().length()).equals(System.lineSeparator())) {
-      this.input.assertRead(System.lineSeparator());
+    input.assertRead(END_MARKER);
+    if (input.peek(System.lineSeparator().length()).equals(System.lineSeparator())) {
+      input.assertRead(System.lineSeparator());
     }
 
     return creator.create(name, content);

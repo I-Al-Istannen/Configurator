@@ -255,7 +255,7 @@ class DslParserTest {
   }
 
   private AstNode getParsedResult(String input) throws ParseException {
-    return new DslParser(new StringReader("Command prefix: #\n" + input), false).parse();
+    return new DslParser(new StringReader("Command prefix: #\n" + input), true).parse();
   }
 
   private AstNode wrapInBlock(AstNode... other) {

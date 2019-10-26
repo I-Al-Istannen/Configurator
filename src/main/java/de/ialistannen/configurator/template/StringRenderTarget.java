@@ -177,7 +177,9 @@ public class StringRenderTarget implements RenderTarget<StringRenderedObject> {
       ComparisonAstNode condition = node.getCondition();
       String result = condition.accept(this);
       if (result.equals("true")) {
-        return node.getContent().accept(this);
+        return node.getIfContent().accept(this);
+      } else if (node.getElseContent() != null) {
+        return node.getElseContent().accept(this);
       }
       return "";
     }
